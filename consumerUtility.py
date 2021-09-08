@@ -125,7 +125,7 @@ def get_linear_expend(prices, util, valuations):
 
 def get_CD_marshallian_demand(prices, budget, valuations):
     normalized_vals = valuations / np.sum(valuations)
-    return normalized_vals*budget/prices
+    return normalized_vals*budget/prices.clip(min = 0.00001)
 
 def get_CD_indirect_util(prices, budget, valuations):
     return get_CD_utility(get_CD_marshallian_demand(prices, budget, valuations), valuations)
