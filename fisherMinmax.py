@@ -120,7 +120,7 @@ def gdad_linear(valuations, budgets, prices_0, learning_rate , num_iters, decay_
 
 ############### Cobb-Douglas ###############
 
-def gda_cd(valuations, budgets, prices_0, learning_rate, num_iters, decay_outer = True, decay_inner = True):
+def gda_cd(valuations, budgets, prices_0, learning_rate, num_iters, decay_outer = False, decay_inner = False):
     prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
@@ -164,7 +164,7 @@ def gda_cd(valuations, budgets, prices_0, learning_rate, num_iters, decay_outer 
 
 ############# Leontief ###############
  
-def gda_leontief(valuations, budgets, prices_0, learning_rate, num_iters, decay_outer = True, decay_inner = True):
+def gda_leontief(valuations, budgets, prices_0, learning_rate, num_iters, decay_outer = False, decay_inner = False):
     prices = prices_0
     prices_hist = []
     demands_hist = []

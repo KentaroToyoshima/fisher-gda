@@ -120,52 +120,52 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
         obj_hist_gda_leontief_all_low.append(objective_values)        
         
 
-        print(f"------------ VGDA ------------")
+        # print(f"------------ VGDA ------------")
 
-        print(f"------ Linear Fisher Market ------\n")
+        # print(f"------ Linear Fisher Market ------\n")
         
-        prices_0  = np.random.rand(num_goods)*10 + 5
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.vgda_linear(valuations, budgets, prices_0, learning_rate_linear[1], num_iters_linear)
+        # prices_0  = np.random.rand(num_goods)*10 + 5
+        # demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.vgda_linear(valuations, budgets, prices_0, learning_rate_linear[1], num_iters_linear)
         
-        prices_hist_gda_linear_all_high.append(prices_gda)
-        demands_hist_gda_linear_all_high.append(demands_gda)
-        objective_values = []
-        for i in range(0, len(demands_hist_gda)):
-            x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            obj = get_obj_linear(p, x, budgets, valuations)
-            objective_values.append(obj)
-        obj_hist_gda_linear_all_high.append(objective_values)
+        # prices_hist_gda_linear_all_high.append(prices_gda)
+        # demands_hist_gda_linear_all_high.append(demands_gda)
+        # objective_values = []
+        # for i in range(0, len(demands_hist_gda)):
+        #     x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
+        #     p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
+        #     obj = get_obj_linear(p, x, budgets, valuations)
+        #     objective_values.append(obj)
+        # obj_hist_gda_linear_all_high.append(objective_values)
         
-        print(f"------ Cobb-Douglas Fisher Market ------")
+        # print(f"------ Cobb-Douglas Fisher Market ------")
         
-        # Normalize valuations for Cobb-Douglas
-        valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T 
+        # # Normalize valuations for Cobb-Douglas
+        # valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T 
         
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.vgda_cd(valuations_cd, budgets, prices_0, learning_rate_cd[1], num_iters_cd)
-        prices_hist_gda_cd_all_high.append(prices_gda)
-        demands_hist_gda_cd_all_high.append(demands_gda)
-        objective_values = []
+        # demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.vgda_cd(valuations_cd, budgets, prices_0, learning_rate_cd[1], num_iters_cd)
+        # prices_hist_gda_cd_all_high.append(prices_gda)
+        # demands_hist_gda_cd_all_high.append(demands_gda)
+        # objective_values = []
         
-        for i in range(0, len(demands_hist_gda)):
-            x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            obj = get_obj_cd(p, x, budgets, valuations_cd)
-            objective_values.append(obj)
-        obj_hist_gda_cd_all_high.append(objective_values)
+        # for i in range(0, len(demands_hist_gda)):
+        #     x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
+        #     p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
+        #     obj = get_obj_cd(p, x, budgets, valuations_cd)
+        #     objective_values.append(obj)
+        # obj_hist_gda_cd_all_high.append(objective_values)
         
-        print(f"------ Leontief Fisher Market ------")
+        # print(f"------ Leontief Fisher Market ------")
         
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.vgda_leontief(valuations, budgets, prices_0, learning_rate_leontief[1], num_iters_leontief)
-        prices_hist_gda_leontief_all_high.append(prices_gda)
-        demands_hist_gda_leontief_all_high.append(demands_gda)
-        objective_values = []
-        for i in range(0, len(demands_hist_gda)):
-            x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            obj = get_obj_leontief(p, x, budgets, valuations)
-            objective_values.append(obj)
-        obj_hist_gda_leontief_all_high.append(objective_values)        
+        # demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.vgda_leontief(valuations, budgets, prices_0, learning_rate_leontief[1], num_iters_leontief)
+        # prices_hist_gda_leontief_all_high.append(prices_gda)
+        # demands_hist_gda_leontief_all_high.append(demands_gda)
+        # objective_values = []
+        # for i in range(0, len(demands_hist_gda)):
+        #     x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
+        #     p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
+        #     obj = get_obj_leontief(p, x, budgets, valuations)
+        #     objective_values.append(obj)
+        # obj_hist_gda_leontief_all_high.append(objective_values)        
     
     return (prices_hist_gda_linear_all_low,
             demands_hist_gda_linear_all_low,
@@ -193,8 +193,8 @@ if __name__ == '__main__':
     num_buyers =  5
     num_goods = 8
     learning_rate_linear =  ((3,1), (1000**(-1/2),1000**(-1/2)))
-    learning_rate_cd =  ((15,1), (500**(-1/2), 500**(-1/2)))
-    learning_rate_leontief =  ((6,4), (500**(-1/2),500**(-1/2)))
+    learning_rate_cd =  ((3,1), (500**(-1/2), 500**(-1/2)))
+    learning_rate_leontief =  ((5,0.001), (500**(-1/2),500**(-1/2)))
     num_iters_linear = 1000
     num_iters_cd = 500
     num_iters_leontief = 500
@@ -288,6 +288,12 @@ if __name__ == '__main__':
     x_cd = np.linspace(1, num_iters_cd, num_iters_cd)
     x_leontief = np.linspace(1, num_iters_leontief, num_iters_leontief)
 
+    font = {'family' : 'normal',
+        'weight' : 'bold',
+        'size'   : 22}
+
+    plt.rc('font', **font)
+
     fig, axs = plt.subplots(1, 3) # Create a figure containing a single axes.
     # First row for experiments with low initial prices and
     # second row for experiments with high initial prices.
@@ -305,7 +311,7 @@ if __name__ == '__main__':
     # axs[0,1].set_ylim(-330, 200)
 
     axs[2].plot([iter for iter in range(num_iters_leontief)], obj_gda_leontief_low, color = "b")
-    # axs[1,0].plot(x, (obj_gda_leontief[0]/4)/x + obj_gda_leontief[-1], color='green', linestyle='dashed', label = "1/T")
+    axs[2].plot(x_leontief, (obj_gda_leontief_low[0] - obj_gda_leontief_low[-1])/(x_leontief**(1/3)) + obj_gda_leontief_low[-1], color='green', linestyle='dashed', label = r"$1/T^{\frac{1}{3}}$")
     axs[2].plot(x_leontief, (obj_gda_leontief_low[0] - obj_gda_leontief_low[-1])/(x_leontief**(1/2)) + obj_gda_leontief_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
     axs[2].set_title("Leontief Market", fontsize = "medium")
     # axs[1, 1].axis('off')
@@ -328,7 +334,7 @@ if __name__ == '__main__':
     # axs[1,2].plot(x_leontief, (obj_gda_leontief_high[0] - obj_gda_leontief_high[-1])/(x_leontief**(1/2)) + obj_gda_leontief_high[-1] - 3, color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
     # axs[1,2].set_title("Leontief Market", fontsize = "medium")
 
-
+    
     for ax in axs.flat:
         ax.set(xlabel='Iteration Number', ylabel='Objective Value')
         ax.yaxis.set_ticks([])
@@ -336,6 +342,8 @@ if __name__ == '__main__':
         ax.label_outer()
 
     name = "obj_graphs"
+
+    fig.set_size_inches(18.5, 6.5)
     plt.savefig(f"graphs/{name}.jpg")
     plt.show()
 
