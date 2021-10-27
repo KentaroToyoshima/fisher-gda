@@ -19,7 +19,7 @@ def project_to_bugdet_set(X, p, b):
     return X
 ############# Linear ###############
 
-def gda_linear(valuations, budgets, prices_0, learning_rate , num_iters, decay_outer = True, decay_inner = True):
+def gda_linear(valuations, budgets, prices_0, learning_rate , num_iters, decay_outer = False, decay_inner = False):
     prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
