@@ -38,7 +38,7 @@ def gda_linear(num_buyers, valuations, budgets, prices_0, learning_rate , num_it
             demands += learning_rate[1]*(valuations-num_buyers*prices)
         
         # Projection step
-        demands = project_to_bugdet_set(demands, prices, budgets)
+        # demands = project_to_bugdet_set(demands, prices, budgets)
 
         
         demands = demands.clip(min = 0) #Should remove logically but afraid things might break
@@ -135,10 +135,10 @@ def gda_cd(num_buyers, valuations, budgets, prices_0, learning_rate, num_iters, 
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*(np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T
         else:
-            demands += learning_rate[1]*((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T-num_buyers*prices)
+            demands += learning_rate[1]*((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)
         
         # Projection step
-        demands = project_to_bugdet_set(demands, prices, budgets)
+        # demands = project_to_bugdet_set(demands, prices, budgets)
 
         demands = demands.clip(min = 0)
         demands_hist.append(demands)
@@ -187,7 +187,7 @@ def gda_leontief(num_buyers, valuations, budgets, prices_0, learning_rate, num_i
                 demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good]))-num_buyers*prices[min_util_good])
 
         # Projection step
-        demands = project_to_bugdet_set(demands, prices, budgets)
+        # demands = project_to_bugdet_set(demands, prices, budgets)
         
      
         demands = demands.clip(min = 0)
