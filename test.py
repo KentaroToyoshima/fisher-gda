@@ -73,7 +73,7 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
         print(f"------ Linear Fisher Market ------\n")
         prices_0  = np.random.rand(num_goods)*10 + 5
         
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(valuations, budgets, prices_0, learning_rate_linear[0], num_iters_linear)
+        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers,valuations, budgets, prices_0, learning_rate_linear[0], num_iters_linear)
         
         prices_hist_gda_linear_all_low.append(prices_gda)
         demands_hist_gda_linear_all_low.append(demands_gda)
@@ -91,7 +91,7 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
         print(f"------ Cobb-Douglas Fisher Market ------")
         valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
         
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(valuations_cd, budgets, prices_0, learning_rate_cd[0], num_iters_cd)
+        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, prices_0, learning_rate_cd[0], num_iters_cd)
         prices_hist_gda_cd_all_low.append(prices_gda)
         demands_hist_gda_cd_all_low.append(demands_gda)
         objective_values = []
@@ -108,7 +108,7 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
         prices_0  = np.random.rand(num_goods) + 10
         
         
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(valuations, budgets, prices_0, learning_rate_leontief[0], num_iters_leontief)
+        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, prices_0, learning_rate_leontief[0], num_iters_leontief)
         prices_hist_gda_leontief_all_low.append(prices_gda)
         demands_hist_gda_leontief_all_low.append(demands_gda)
         objective_values = []
