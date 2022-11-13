@@ -32,7 +32,7 @@ def gda_linear(num_buyers, valuations, budgets, prices_0, learning_rate , num_it
         
         ### Demand Step ###    
         # Gradient Step
-        if (decay_outer):
+        if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*valuations
         else:    
             demands += learning_rate[1]*(valuations-num_buyers*prices)
