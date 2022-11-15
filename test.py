@@ -24,7 +24,7 @@ def get_obj_cd(prices, demands, budgets, valuations):
         v = valuations[buyer,:]
         utils[buyer] = cu.get_CD_indirect_util(prices.clip(min= 0.0001), b, v)
     
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001)) 
+    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001))
 
 def get_obj_leontief(prices, demands, budgets, valuations):
     utils = np.zeros(budgets.shape[0])
@@ -72,6 +72,8 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
         
         print(f"------ Linear Fisher Market ------\n")
         prices_0  = np.random.rand(num_goods)*10 + 5
+        #prices_0  = np.full(num_goods, 100, dtype=float)
+        print(prices_0)
         
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(valuations, budgets, prices_0, learning_rate_linear[0], num_iters_linear)
         
@@ -87,8 +89,8 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
         obj_hist_gda_linear_all_low.append(objective_values)
         
         
-        prices_0  = np.random.rand(num_goods) + 5
         print(f"------ Cobb-Douglas Fisher Market ------")
+        prices_0  = np.random.rand(num_goods) + 5
         valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
         
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(valuations_cd, budgets, prices_0, learning_rate_cd[0], num_iters_cd)
@@ -195,9 +197,9 @@ if __name__ == '__main__':
     learning_rate_linear =  ((3,0.1), (1000**(-1/2),1000**(-1/2)))
     learning_rate_cd =  ((3,1), (500**(-1/2), 500**(-1/2)))
     learning_rate_leontief =  ((3,1), (500**(-1/2),500**(-1/2)))
-    num_iters_linear = 1000
-    num_iters_cd = 500
-    num_iters_leontief = 500
+    num_iters_linear = 2000
+    num_iters_cd = 2000
+    num_iters_leontief = 2000
 
     # results = 
     (prices_hist_gda_linear_all_low,
@@ -282,9 +284,6 @@ if __name__ == '__main__':
     obj_gda_cd_high = np.mean(obj_hist_gda_cd_all_high, axis = 0)
     obj_gda_leontief_high = np.mean(obj_hist_gda_leontief_all_high, axis = 0)
 
-    # obj_gda_leontief_low = obj_gda_leontief_low[:-200]
-    # obj_gda_leontief_high = obj_gda_leontief_high[:-200]
-
     num_iters_linear = len(obj_gda_linear_low)
     num_iters_cd = len(obj_gda_cd_low)
     num_iters_leontief = len(obj_gda_leontief_low)
@@ -292,65 +291,28 @@ if __name__ == '__main__':
     x_cd = np.linspace(1, num_iters_cd, num_iters_cd)
     x_leontief = np.linspace(1, num_iters_leontief, num_iters_leontief)
 
-    font = {'family' : 'normal',
-        'weight' : 'bold',
-        'size'   : 22}
+    plt.rcParams["font.size"] = 18
 
-    plt.rc('font', **font)
+    fig, axs = plt.subplots(1, 3)
 
-    fig, axs = plt.subplots(1, 3) # Create a figure containing a single axes.
-    # First row for experiments with low initial prices and
-    # second row for experiments with high initial prices.
-    
-    # Add shift in plots to make the difference clearer
-    axs[0].plot([iter for iter in range(num_iters_linear)], (obj_gda_linear_low)/(x_linear**(-1/2)), alpha = 1, color = "b")
-    # print((obj_gda_linear_low) - (x_linear**(-1/2)))
-    # axs[0].plot([iter for iter in range(num_iters_linear)], obj_gda_linear_low, alpha = 1, color = "g")
-    # axs[0].plot((obj_gda_linear_low[0] - obj_gda_linear_low[-1],)/(x_linear**(1/2)) + obj_gda_linear_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt{T}$")
+    axs[0].plot([iter for iter in range(num_iters_linear)], obj_gda_linear_low/(x_linear**(-1/2)), alpha = 1, color = "b")
     axs[0].set_title("Linear Market", fontsize = "medium")
-    # axs[0,0].set_ylim(2100, 2500)
 
-    axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low/(x_cd**(-1/2)) , color = "b")
-    # axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low, color = "g")
-    # axs[0,1].plot(x, (obj_gda_cd[0]/3)/x + obj_gda_cd[-1], color='green', linestyle='dashed', label = "1/T")
-    # axs[1].plot(x_cd, (obj_gda_cd_low[0] - obj_gda_cd_low[-1])/(x_cd**(1/2)) + obj_gda_cd_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
+    axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low/(x_cd**(-1/2)), color = "b")
     axs[1].set_title("Cobb-Douglas Market", fontsize = "medium")
-    # axs[0,1].set_ylim(-330, 200)
 
     axs[2].plot([iter for iter in range(num_iters_leontief)], obj_gda_leontief_low/(x_leontief**(-1/2)), color = "b")
-    # axs[2].plot(x_leontief, (obj_gda_leontief_low[0] - obj_gda_leontief_low[-1])/(x_leontief**(1/3)) + obj_gda_leontief_low[-1], color='green', linestyle='dashed', label = r"$1/T^{\frac{1}{3}}$")
-    # axs[2].plot(x_leontief, (obj_gda_leontief_low[0] - obj_gda_leontief_low[-1])/(x_leontief**(1/2)) + obj_gda_leontief_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
     axs[2].set_title("Leontief Market", fontsize = "medium")
-    # axs[1, 1].axis('off')
-    # axs[0,2].set_ylim(-1600, -900)
-
-    # # Add shift in plots to make the difference clearer
-    # axs[1,0].plot([iter for iter in range(num_iters_linear)], obj_gda_linear_high, alpha = 1, color = "b")
-    # axs[1,0].plot((3/2)*(obj_gda_linear_high[0]- obj_gda_linear_high[-1])/((x_linear)**(1/2)) + obj_gda_linear_high[-1], color='red', linestyle='dashed', label = r"$1/\sqrt{T}$")
-    # axs[1,0].set_title("Linear Market", fontsize = "medium")
-    # # axs[1,0].set_ylim(2115, 2145)
-
-    # axs[1,1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_high , alpha = 1, color = "b")
-    # # axs[0,1].plot(x, (obj_gda_cd[0]/3)/x + obj_gda_cd[-1], color='green', linestyle='dashed', label = "1/T")
-    # axs[1,1].plot(x_cd, (obj_gda_cd_high[0] - obj_gda_cd_high[-1])/(x_cd**(1/2)) + obj_gda_cd_high[-1] , color='red', linestyle='dashed', label = r"$1/\sqrt{T}$")
-    # axs[1,1].set_title("Cobb-Douglas Market", fontsize = "medium")
-    # # axs[1,1].set_ylim(-305, -290)
-
-    # axs[1,2].plot([iter for iter in range(num_iters_leontief)], obj_gda_leontief_high, alpha = 1, color = "b")
-    # # axs[1,0].plot(x, (obj_gda_leontief[0]/4)/x + obj_gda_leontief[-1], color='green', linestyle='dashed', label = "1/T")
-    # axs[1,2].plot(x_leontief, (obj_gda_leontief_high[0] - obj_gda_leontief_high[-1])/(x_leontief**(1/2)) + obj_gda_leontief_high[-1] - 3, color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
-    # axs[1,2].set_title("Leontief Market", fontsize = "medium")
-
     
     for ax in axs.flat:
-        ax.set(xlabel='Iteration Number', ylabel=r'Explotability/$T^{-1/2}$')
-        # ax.yaxis.set_ticks([])
-    for ax in axs.flat:
-        ax.label_outer()
+        ax.set(xlabel='Iteration Number', ylabel=r'Explotability')
+    #for ax in axs.flat:
+    #    ax.label_outer()
 
     name = "obj_graphs"
 
-    fig.set_size_inches(18.5, 6.5)
+    fig.set_size_inches(18.5, 5.5)
+    fig.subplots_adjust(wspace=0.5, hspace=0.5)
     plt.savefig(f"graphs/{name}.jpg")
     plt.show()
 
