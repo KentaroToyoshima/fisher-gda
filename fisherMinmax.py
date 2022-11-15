@@ -34,7 +34,7 @@ def gda_linear(num_buyers, valuations, budgets, prices_0, learning_rate , num_it
         # Gradient Step
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*valuations
-        else:    
+        else:
             demands += learning_rate[1]*(valuations-num_buyers*prices)
         
         # Projection step
@@ -62,61 +62,6 @@ def gda_linear(num_buyers, valuations, budgets, prices_0, learning_rate , num_it
 
     return (demands, prices, demands_hist, prices_hist)
 
-def gdad_linear(valuations, budgets, prices_0, learning_rate , num_iters, decay_outer = False, decay_inner = False):
-    prices = np.copy(prices_0)
-    prices_hist = []
-    demands_hist = []
-    demands = np.zeros(valuations.shape)  
-    bang_per_bucks = np.zeros(valuations.shape[0])
-    
-    for iter in range(1, num_iters):
-        if (not iter % 500):
-            print(f" ----- Iteration {iter}/{num_iters} ----- ")
-        
-        
-        prices_hist.append(prices)
-        
-        ### Bang-per-buck Step ###
-
-        if (decay_outer):
-            bang_per_bucks += iter**(-1/2)*(demands @ prices - budgets)
-        else:
-            bang_per_bucks += demands @ prices - budgets
-        
-        ### Demand Step ###    
-        
-        # Gradient Step
-        if (decay_outer):
-            demands += iter**(-1/2)*(valuations.T/(np.sum(demands*valuations, axis = 1)*budgets)).T
-        else:    
-            demands += (valuations.T/(np.sum(demands*valuations, axis = 1)*budgets)).T
-        
-        # Projection step
-        # demands = project_to_bugdet_set(demands, prices, budgets)
-
-        
-        demands = demands.clip(min = 0) #Should remove logically but afraid things might break
-        demands_hist.append(demands)
-        
-        ### Price Step ###
-        
-        # Gradient Step
-        demand = demands.T @ bang_per_bucks
-        excess_demand = demand - 1
-        
-        
-        if (decay_outer) :
-            step_size = learning_rate*(iter**(-1/2))*excess_demand
-            prices += step_size*(prices > 0)
-        else:
-            step_size = learning_rate*excess_demand
-            prices += step_size*(prices > 0)
-        
-        prices = prices.clip(min=0.00001)
-        
-
-    return (demands, prices, demands_hist, prices_hist)
-
 ############### Cobb-Douglas ###############
 
 def gda_cd(num_buyers, valuations, budgets, prices_0, learning_rate, num_iters, decay_outer = False, decay_inner = False):
@@ -135,7 +80,7 @@ def gda_cd(num_buyers, valuations, budgets, prices_0, learning_rate, num_iters, 
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*(np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T
         else:
-            demands += learning_rate[1]*((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)
+            demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)-num_buyers*prices)
         
         # Projection step
         # demands = project_to_bugdet_set(demands, prices, budgets)
@@ -351,4 +296,58 @@ def vgda_leontief(valuations, budgets, prices_0, learning_rate, num_iters, decay
         prices = prices.clip(min=0.00001)
         prices_hist.append(prices)  
 
+    return (demands, prices, demands_hist, prices_hist)
+
+def gdad_linear(valuations, budgets, prices_0, learning_rate , num_iters, decay_outer = False, decay_inner = False):
+    prices = np.copy(prices_0)
+    prices_hist = []
+    demands_hist = []
+    demands = np.zeros(valuations.shape)  
+    bang_per_bucks = np.zeros(valuations.shape[0])
+    
+    for iter in range(1, num_iters):
+        if (not iter % 500):
+            print(f" ----- Iteration {iter}/{num_iters} ----- ")
+        
+        
+        prices_hist.append(prices)
+        
+        ### Bang-per-buck Step ###
+
+        if (decay_outer):
+            bang_per_bucks += iter**(-1/2)*(demands @ prices - budgets)
+        else:
+            bang_per_bucks += demands @ prices - budgets
+        
+        ### Demand Step ###    
+        
+        # Gradient Step
+        if (decay_outer):
+            demands += iter**(-1/2)*(valuations.T/(np.sum(demands*valuations, axis = 1)*budgets)).T
+        else:    
+            demands += (valuations.T/(np.sum(demands*valuations, axis = 1)*budgets)).T
+        
+        # Projection step
+        # demands = project_to_bugdet_set(demands, prices, budgets)
+
+        
+        demands = demands.clip(min = 0) #Should remove logically but afraid things might break
+        demands_hist.append(demands)
+        
+        ### Price Step ###
+        
+        # Gradient Step
+        demand = demands.T @ bang_per_bucks
+        excess_demand = demand - 1
+        
+        
+        if (decay_outer) :
+            step_size = learning_rate*(iter**(-1/2))*excess_demand
+            prices += step_size*(prices > 0)
+        else:
+            step_size = learning_rate*excess_demand
+            prices += step_size*(prices > 0)
+        
+        prices = prices.clip(min=0.00001)
+        
     return (demands, prices, demands_hist, prices_hist)
