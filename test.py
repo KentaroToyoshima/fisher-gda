@@ -187,7 +187,7 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
 
 if __name__ == '__main__':
 
-    num_experiments = 10
+    num_experiments = 1
     num_buyers =  5
     num_goods = 8
     learning_rate_linear =  ((3,0.1), (1000**(-1/2),1000**(-1/2)))
@@ -310,6 +310,7 @@ if __name__ == '__main__':
     name = "obj_graphs"
 
     fig.set_size_inches(18.5, 5.5)
+    plt.subplots_adjust(wspace=0.4)
     plt.savefig(f"graphs/{name}.jpg")
     plt.show()
 
