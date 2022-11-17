@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Requirements
 
 ## Programming Languages
@@ -10,6 +9,4 @@ To install python requirements run the following command
 ```
 pip install -r requirements.txt
 ```
-=======
 # fisher-gda
->>>>>>> origin/main
