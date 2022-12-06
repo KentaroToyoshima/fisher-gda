@@ -38,7 +38,7 @@ def get_obj_leontief(prices, demands, budgets, valuations):
 # TODO:pricesの推移をプロット
 # TODO:demandの推移をプロット
 # TODO:手法ごとにmutation rateやref strategyの値を変える
-def run_test(num_buyers, num_goods,  valuations, valuations_cd, budgets, demands_0, prices_0, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters):
+def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters):
     
     prices_hist_gda_linear_all_low = []
     demands_hist_gda_linear_all_low = []
@@ -62,13 +62,19 @@ def run_test(num_buyers, num_goods,  valuations, valuations_cd, budgets, demands
     for experiment_num in range(num_experiments):
         # Initialize random market parameters
         # NOTE:valuationとbudgetsを変えている
+        valuations = np.random.rand(num_buyers, num_goods)*10 + 5
+        valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
+        budgets = np.random.rand(num_buyers)*10 + 10
+        # budgets = np.array([15.71,  14.916, 13.519, 13.967, 19.407])
+        demands_0 = np.zeros(valuations.shape)
+        prices_0  = np.random.rand(num_goods)*10 + 5
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
         print(f"*******************************")
         print(f"------------ GDA ------------")
 
-        print(f"------ Linear Fisher Market ------\n")
+        print(f"------ Linear Fisher Market ------")
         
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear[0], mutation_rate, demands_linear_ref, prices_linear_ref, num_iters)
         
@@ -133,20 +139,15 @@ def run_test(num_buyers, num_goods,  valuations, valuations_cd, budgets, demands
 
 if __name__ == '__main__':
 
-    num_experiments = 10
+    num_experiments = 50
     num_buyers = 5
     num_goods = 8
     learning_rate_linear =  ((2,0.1), (1000**(-1/2),1000**(-1/2)))  #(demand_lr, price_lr)
     learning_rate_cd =  ((2,0.1), (500**(-1/2), 500**(-1/2)))
     learning_rate_leontief =  ((2,0.1), (500**(-1/2),500**(-1/2)))
     mutation_rate = 1
-    num_iters= 1000
+    num_iters= 500
 
-    valuations = np.random.rand(num_buyers, num_goods)*10 + 5
-    budgets = np.random.rand(num_buyers)*10 + 10
-    # budgets = np.array([15.71,  14.916, 13.519, 13.967, 19.407])
-    demands_0 = np.zeros(valuations.shape)
-    prices_0  = np.random.rand(num_goods)*10 + 5
     #prices_0  = np.full(num_goods, 5, dtype=float)
     demands_linear_ref = np.array([[0.15870897253843697,0.18667388393005538,0.18262319641795074,0.23823041197502504,0.216446175522833,0.18785419361586111,0.23285530284893508,0.20507746522566062],
 [0.2214629722042028,0.20860808797843736,0.22140787720885277,0.12582867717934845,0.21301308255590082,0.17276529955610048,0.24522152090120686,0.18522372158327838],
@@ -155,8 +156,6 @@ if __name__ == '__main__':
 [0.19931382866220138,0.18941322073160685,0.2480220856128333,0.16454023899668344,0.16201429058635855,0.23105622770410242,0.1434239927283041,0.2317231818367359]])
     prices_linear_ref = np.array([11.561, 11.72,  11.67,  11.247, 11.496, 11.587, 11.433, 11.412])
 
-
-    valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
     demands_cd_ref = np.array([[0.1995556914054147,0.20165524477521304,0.19931980223021523,0.21632457826934778,0.20787097054079648,0.20039455450426125,0.2105604994073406,0.1938437875510947],
 [0.2041706251959548,0.2026957637286098,0.2101141903995081,0.18036968807710924,0.20207163553748636,0.19497829771435835,0.20384670607543312,0.19860233725220827],
 [0.20161655204518536,0.20518956524621643,0.19713009601735923,0.21690380709960821,0.1974723146980503,0.2106600686225747,0.20725089619422657,0.20592135061060687],
@@ -189,7 +188,7 @@ if __name__ == '__main__':
                 obj_hist_gda_cd_all_high,
                 prices_hist_gda_leontief_all_high,
                 demands_hist_gda_leontief_all_high,
-                obj_hist_gda_leontief_all_high) = run_test(num_buyers, num_goods, valuations, valuations_cd, budgets, demands_0, prices_0, 
+                obj_hist_gda_leontief_all_high) = run_test(num_buyers, num_goods,
                                                             demands_linear_ref, demands_cd_ref, demands_leontief_ref, 
                                                             prices_linear_ref, prices_cd_ref, prices_leontief_ref, 
                                                             learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters)
