@@ -19,13 +19,13 @@ def project_to_bugdet_set(X, p, b):
     return X
 ############# Linear ###############
 
-def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, decay_outer = False, decay_inner = False):
+def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, decay_outer = False, decay_inner = False):
     demands = np.copy(demands_0)
     prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
     for iter in range(1, num_iters):
-        if (not iter % 500):
+        if (not iter % 1000):
             print(f" ----- Iteration {iter}/{num_iters} ----- ")
         
         ### Demand Step ###
@@ -33,12 +33,21 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*valuations
         else:
-            #demands += learning_rate[1]*(valuations + mutation_rate*(demands_ref - demands))
-            demands += learning_rate[1]*(valuations - num_buyers*prices + mutation_rate*(demands_ref - demands))
-            #demands += learning_rate[1]*(valuations - num_buyers*prices)
-            #demands += learning_rate[1]*valuations
+            if arch == 'm-alg2':
+                demands += learning_rate[1]*(valuations - num_buyers*prices + mutation_rate*(demands_ref - demands))
+            elif arch == 'alg2':
+                demands += learning_rate[1]*(valuations - num_buyers*prices)
+            elif arch == 'alg4':
+                demands += learning_rate[1]*valuations
+            else:
+                print('error')
+                exit()
+        if arch == 'm-alg2' and iter % update_num == 0:
+            demands_ref = np.copy(demands)
+            print(demands_ref)
         # Projection step
-        #demands = project_to_bugdet_set(demands, prices, budgets)
+        if arch == 'alg4':
+            demands = project_to_bugdet_set(demands, prices, budgets)
         
         demands = demands.clip(min = 0) #Should remove logically but afraid things might break
         demands_hist.append(demands)
@@ -52,9 +61,13 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
             step_size = learning_rate[0]*(iter**(-1/2))*excess_demand
             prices += step_size*(prices > 0)
         else:
-            step_size = learning_rate[0]*(excess_demand + mutation_rate*(prices_ref - prices))
-            #step_size = learning_rate[0]*excess_demand
+            if arch == 'm-alg2':
+                step_size = learning_rate[0]*(excess_demand + mutation_rate*(prices_ref - prices))
+            else:
+                step_size = learning_rate[0]*excess_demand
             prices += step_size*(prices > 0)
+        if arch == 'm-alg2' and iter % update_num == 0:
+            prices_ref = np.copy(prices)
         
         prices = prices.clip(min=0.0001)
         prices_hist.append(prices)
@@ -64,14 +77,14 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
 
 ############### Cobb-Douglas ###############
 
-def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, decay_outer = False, decay_inner = False):
+def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, decay_outer = False, decay_inner = False):
     demands = np.copy(demands_0).clip(min = 0.001)
     prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
 
     for iter in range(1, num_iters):
-        if (not iter % 500):
+        if (not iter % 1000):
             print(f" ----- Iteration {iter}/{num_iters} ----- ")
         
         ### Demands Step ###
@@ -80,12 +93,21 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*(np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T
         else:
-            #demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T) + mutation_rate*(demands_ref - demands))
-            demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T) - num_buyers*prices + mutation_rate*(demands_ref - demands))
-            #demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)-num_buyers*prices)
-            #demands += learning_rate[1]*((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)
+            if arch == 'm-alg2':
+                demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T) - num_buyers*prices + mutation_rate*(demands_ref - demands))
+            elif arch == 'alg2':
+                demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)-num_buyers*prices)
+            elif arch == 'alg4':
+                demands += learning_rate[1]*((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)
+            else:
+                print('error')
+                exit()
+
+        if arch == 'm-alg2' and iter % update_num == 0:
+            demands_ref = np.copy(demands)
         # Projection step
-        #demands = project_to_bugdet_set(demands, prices, budgets)
+        if arch == 'alg4':
+            demands = project_to_bugdet_set(demands, prices, budgets)
 
         demands = demands.clip(min = 0)
         demands_hist.append(demands)
@@ -99,9 +121,14 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
             step_size = learning_rate[0]*(iter**(-1/2))*excess_demand
             prices += step_size*((prices) > 0)
         else:
-            step_size = learning_rate[0]*(excess_demand + mutation_rate*(prices_ref - prices))
-            #step_size = learning_rate[0]*excess_demand
+            if arch == 'm-alg2':
+                step_size = learning_rate[0]*(excess_demand + mutation_rate*(prices_ref - prices))
+            else:
+                step_size = learning_rate[0]*excess_demand
             prices += step_size*((prices) > 0)
+
+        if arch == 'm-alg2' and iter % update_num == 0:
+            prices_ref = np.copy(prices)
 
         prices = prices.clip(min=0.0001)
         prices_hist.append(prices)
@@ -110,14 +137,14 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
 
 ############# Leontief ###############
  
-def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, decay_outer = False, decay_inner = False):
+def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, decay_outer = False, decay_inner = False):
     demands = np.copy(demands_0)
     prices = prices_0
     prices_hist = []
     demands_hist = []
     
     for iter in range(1, num_iters):
-        if (not iter % 500):
+        if (not iter % 1000):
             print(f" ----- Iteration {iter}/{num_iters} ----- ")
         
         ### Demands Step ###
@@ -128,14 +155,22 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             # Gradient Step
             if(decay_inner):
                 demands[buyer,min_util_good] += learning_rate[1]*iter**(-1/2)*(1/(valuations[buyer, min_util_good]))
-            else:  
-                #demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good])) + mutation_rate*(demands_ref[buyer, min_util_good] - demands[buyer, min_util_good]))
-                demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good])) - num_buyers*prices[min_util_good] + mutation_rate*(demands_ref[buyer, min_util_good] - demands[buyer, min_util_good]))
-                #demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good]))-num_buyers*prices[min_util_good])
-                #demands[buyer,min_util_good] += learning_rate[1]*(1/(valuations[buyer, min_util_good]))
+            else:
+                if arch == 'm-alg2':
+                    demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good])) - num_buyers*prices[min_util_good] + mutation_rate*(demands_ref[buyer, min_util_good] - demands[buyer, min_util_good]))
+                elif arch == 'alg2':
+                    demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good]))-num_buyers*prices[min_util_good])
+                elif arch == 'alg4':
+                    demands[buyer,min_util_good] += learning_rate[1]*(1/(valuations[buyer, min_util_good]))
+                else:
+                    print('error')
+                    exit()
+            if arch == 'm-alg2' and iter % update_num == 0:
+                demands_ref = np.copy(demands)
 
         # Projection step
-        #demands = project_to_bugdet_set(demands, prices, budgets)
+        if arch == 'alg4':
+            demands = project_to_bugdet_set(demands, prices, budgets)
         
         demands = demands.clip(min = 0)
         
@@ -151,10 +186,14 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             step_size = learning_rate[0]*iter**(-1/2)*excess_demand
             prices += step_size*((prices) > 0)
         else:
-            step_size = learning_rate[0]*(excess_demand + mutation_rate*(prices_ref - prices))
-            #step_size = learning_rate[0]*excess_demand
+            if arch == 'm-alg2':
+                step_size = learning_rate[0]*(excess_demand + mutation_rate*(prices_ref - prices))
+            else:
+                step_size = learning_rate[0]*excess_demand
             prices += step_size*((prices) > 0)
-        
+        if arch == 'm-alg2' and iter % update_num == 0:
+            prices_ref = np.copy(prices)
+
         prices = prices.clip(min=0.00001)
         # print(prices)
         prices_hist.append(prices)
