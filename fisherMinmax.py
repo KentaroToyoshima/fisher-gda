@@ -42,9 +42,8 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
             else:
                 print('error')
                 exit()
-        if arch == 'm-alg2' and iter % update_num == 0:
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             demands_ref = np.copy(demands)
-            print(demands_ref)
         # Projection step
         if arch == 'alg4':
             demands = project_to_bugdet_set(demands, prices, budgets)
@@ -66,7 +65,7 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
             else:
                 step_size = learning_rate[0]*excess_demand
             prices += step_size*(prices > 0)
-        if arch == 'm-alg2' and iter % update_num == 0:
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             prices_ref = np.copy(prices)
         
         prices = prices.clip(min=0.0001)
@@ -103,7 +102,7 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
                 print('error')
                 exit()
 
-        if arch == 'm-alg2' and iter % update_num == 0:
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             demands_ref = np.copy(demands)
         # Projection step
         if arch == 'alg4':
@@ -127,7 +126,7 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
                 step_size = learning_rate[0]*excess_demand
             prices += step_size*((prices) > 0)
 
-        if arch == 'm-alg2' and iter % update_num == 0:
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             prices_ref = np.copy(prices)
 
         prices = prices.clip(min=0.0001)
@@ -165,7 +164,7 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
                 else:
                     print('error')
                     exit()
-            if arch == 'm-alg2' and iter % update_num == 0:
+            if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
                 demands_ref = np.copy(demands)
 
         # Projection step
@@ -191,7 +190,7 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             else:
                 step_size = learning_rate[0]*excess_demand
             prices += step_size*((prices) > 0)
-        if arch == 'm-alg2' and iter % update_num == 0:
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             prices_ref = np.copy(prices)
 
         prices = prices.clip(min=0.00001)

@@ -1,10 +1,13 @@
 
 import fisherMinmax as fm
 import numpy as np
+import os
+import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
 import consumerUtility as cu
 from datetime import date
+from pathlib import Path
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
 
@@ -139,16 +142,28 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
 if __name__ == '__main__':
 
-    num_experiments = 10
+    num_experiments = 5
     num_buyers = 5
     num_goods = 8
     learning_rate_linear =  ((2,0.1), (1000**(-1/2),1000**(-1/2)))  #(demand_lr, price_lr)
-    learning_rate_cd =  ((2,0.1), (500**(-1/2), 500**(-1/2)))
-    learning_rate_leontief =  ((2,0.1), (500**(-1/2),500**(-1/2)))
+    learning_rate_cd = ((2,0.1), (500**(-1/2), 500**(-1/2)))
+    learning_rate_leontief = ((2,0.1), (500**(-1/2),500**(-1/2)))
     mutation_rate = 1
     num_iters= 5000
-    update_num = 10000000
+    update_num = 0
     arch = 'm-alg2'
+
+    now = datetime.datetime.now()
+    nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
+    dir_data = Path(f"results/{nowdate}_{arch}_en_{num_experiments}_iters_{num_iters}_ml_{mutation_rate}_un_{update_num}")
+    dir_obj = Path(f"{dir_data}/data/obj")
+    dir_obj.mkdir(parents=True, exist_ok=True)
+    dir_demands = Path(f"{dir_data}/data/demands")
+    dir_demands.mkdir(parents=True, exist_ok=True)
+    dir_prices = Path(f"{dir_data}/data/prices")
+    dir_prices.mkdir(parents=True, exist_ok=True)
+    dir_graphs = Path(f"{dir_data}/graphs")
+    dir_graphs.mkdir(parents=True, exist_ok=True)
 
     #収束先
     '''
@@ -166,7 +181,6 @@ if __name__ == '__main__':
 [0.12129726016601235,0.07878879479173947,0.30017126713227027,0.24766918631790005,0.40808974935594106,0.21325956897499648,0.20374534679357895,0.15727645853439082]])
     prices_linear_ref = np.array([9.781, 10.811, 10.775, 10.799, 11.359, 11.316, 11.157, 11.19])
     
-
     #収束先
     '''
     demands_cd_ref = np.array([[0.1995556914054147,0.20165524477521304,0.19931980223021523,0.21632457826934778,0.20787097054079648,0.20039455450426125,0.2105604994073406,0.1938437875510947],
@@ -223,7 +237,6 @@ if __name__ == '__main__':
                                                             learning_rate_linear, learning_rate_cd, learning_rate_leontief, 
                                                             mutation_rate, num_experiments, num_iters, update_num, arch)
 
-    # save results
     obj_hist_gda_linear_all_low = np.array(obj_hist_gda_linear_all_low)
     obj_hist_gda_cd_all_low = np.array(obj_hist_gda_cd_all_low)
     obj_hist_gda_leontief_all_low = np.array(obj_hist_gda_leontief_all_low)
@@ -232,9 +245,9 @@ if __name__ == '__main__':
     obj_hist_gda_cd_low =  pd.DataFrame(obj_hist_gda_cd_all_low)
     obj_hist_gda_leontief_low =  pd.DataFrame( obj_hist_gda_leontief_all_low)
 
-    obj_hist_gda_linear_low.to_csv("data/obj/{}_obj_hist_gda_linear_low.csv".format(arch))
-    obj_hist_gda_cd_low.to_csv("data/obj/{}_obj_hist_gda_cd_low.csv".format(arch))
-    obj_hist_gda_leontief_low.to_csv("data/obj/{}_obj_hist_gda_leontief_low.csv".format(arch))
+    obj_hist_gda_linear_low.to_csv("{}/{}_obj_hist_gda_linear_low.csv".format(dir_obj, arch))
+    obj_hist_gda_cd_low.to_csv("{}/{}_obj_hist_gda_cd_low.csv".format(dir_obj, arch))
+    obj_hist_gda_leontief_low.to_csv("{}/{}_obj_hist_gda_leontief_low.csv".format(dir_obj, arch))
 
     prices_hist_gda_linear_all_low = np.array(prices_hist_gda_linear_all_low)
     prices_hist_gda_cd_all_low = np.array(prices_hist_gda_cd_all_low)
@@ -244,9 +257,9 @@ if __name__ == '__main__':
     prices_gda_cd_low =  pd.DataFrame(prices_hist_gda_cd_all_low)
     prices_gda_leontief_low =  pd.DataFrame( prices_hist_gda_leontief_all_low)
 
-    prices_gda_linear_low.to_csv("data/prices/{}_prices_gda_linear_low.csv".format(arch))
-    prices_gda_cd_low.to_csv("data/prices/{}_prices_gda_cd_low.csv".format(arch))
-    prices_gda_leontief_low.to_csv("data/prices/{}_prices_gda_leontief_low.csv".format(arch))
+    prices_gda_linear_low.to_csv("{}/{}_prices_gda_linear_low.csv".format(dir_prices, arch))
+    prices_gda_cd_low.to_csv("{}/{}_prices_gda_cd_low.csv".format(dir_prices, arch))
+    prices_gda_leontief_low.to_csv("{}/{}_prices_gda_leontief_low.csv".format(dir_prices, arch))
 
     print(np.mean(prices_hist_gda_linear_all_low, axis=0))
     print(np.mean(prices_hist_gda_cd_all_low, axis=0))
@@ -260,9 +273,9 @@ if __name__ == '__main__':
     demands_gda_cd_low =  pd.DataFrame(demands_hist_gda_cd_all_low)
     demands_gda_leontief_low =  pd.DataFrame(demands_hist_gda_leontief_all_low)
 
-    demands_gda_linear_low.to_csv("data/demands/{}_demands_gda_linear_low.csv".format(arch))
-    demands_gda_cd_low.to_csv("data/demands/{}_demands_gda_cd_low.csv".format(arch))
-    demands_gda_leontief_low.to_csv("data/demands/{}_demands_gda_leontief_low.csv".format(arch))
+    demands_gda_linear_low.to_csv("{}/{}_demands_gda_linear_low.csv".format(dir_demands, arch))
+    demands_gda_cd_low.to_csv("{}/{}_demands_gda_cd_low.csv".format(dir_demands, arch))
+    demands_gda_leontief_low.to_csv("{}/{}_demands_gda_leontief_low.csv".format(dir_demands, arch))
 
     obj_gda_linear_low = np.mean(obj_hist_gda_linear_all_low, axis = 0)
     obj_gda_cd_low = np.mean(obj_hist_gda_cd_all_low, axis = 0)
@@ -271,10 +284,6 @@ if __name__ == '__main__':
     obj_gda_linear_low = obj_gda_linear_low - np.min(obj_gda_linear_low)
     obj_gda_cd_low = obj_gda_cd_low - np.min(obj_gda_cd_low)
     obj_gda_leontief_low = obj_gda_leontief_low - np.min(obj_gda_leontief_low)
-    
-    #print(obj_gda_linear_low)
-    #print(obj_gda_cd_low)
-    #print(obj_gda_leontief_low)
 
     # plot
     num_iters_linear = len(obj_gda_linear_low)
@@ -298,16 +307,16 @@ if __name__ == '__main__':
     
     for ax in axs.flat:
         ax.set(xlabel='Iteration Number', ylabel=r'Explotability')
-        ax.set_ylim(-0.5, 10)
+        ax.set_ylim(-0.5, 5)
 
     fig.set_size_inches(18.5, 5.5)
     plt.rcParams["font.size"] = 18
     plt.subplots_adjust(wspace=0.4)
-    plt.savefig(f"graphs/{arch}_obj_graphs.jpg")
+    plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
     plt.show()
     obj_gda_linear_low = pd.DataFrame(obj_gda_linear_low)
     obj_gda_cd_low = pd.DataFrame(obj_gda_cd_low)
     obj_gda_leontief_low = pd.DataFrame(obj_gda_leontief_low)
-    obj_gda_linear_low.to_csv("data/obj/{}_exploit_gda_linear_low.csv".format(arch))
-    obj_gda_cd_low.to_csv("data/obj/{}_exploit_gda_cd_low.csv".format(arch))
-    obj_gda_leontief_low.to_csv("data/obj/{}_exploit_gda_leontief_low.csv".format(arch))
+    obj_gda_linear_low.to_csv("{}/{}_exploit_gda_linear_low.csv".format(dir_obj, arch))
+    obj_gda_cd_low.to_csv("{}/{}_exploit_gda_cd_low.csv".format(dir_obj, arch))
+    obj_gda_leontief_low.to_csv("{}/{}_exploit_gda_leontief_low.csv".format(dir_obj, arch))
