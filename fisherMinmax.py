@@ -104,13 +104,13 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
 
         if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             demands_ref = np.copy(demands)
+
         # Projection step
         if arch == 'alg4':
             demands = project_to_bugdet_set(demands, prices, budgets)
 
         demands = demands.clip(min = 0)
         demands_hist.append(demands)
-        
         
         ### Prices Step ###
         demand = np.sum(demands, axis = 0)
@@ -172,13 +172,11 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             demands = project_to_bugdet_set(demands, prices, budgets)
         
         demands = demands.clip(min = 0)
-        
         demands_hist.append(demands)
         
         ### Prices Step ###
         
         demand = np.sum(demands, axis = 0)
-        # print(f"demands {demand}")
         excess_demand = demand - 1
         
         if (decay_outer):
@@ -194,7 +192,6 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             prices_ref = np.copy(prices)
 
         prices = prices.clip(min=0.00001)
-        # print(prices)
         prices_hist.append(prices)
 
     return (demands, prices, demands_hist, prices_hist)

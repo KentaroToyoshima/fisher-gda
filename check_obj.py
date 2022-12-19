@@ -190,7 +190,7 @@ if __name__ == '__main__':
 #[0.18533950357527915,0.1971859821982523,0.1923152468835495,0.2033391191539517,0.19670660829422112,0.1914839997320627,0.1953371311847152,0.1914030224995744]])
     #prices_leontief_ref = np.array([10.539, 12.227,  8.069,  8.301,  6.618, 14.155,  8.706,  6.785])
     
-    obj = get_obj_linear(prices_linear_ref, demands_linear_ref, )
+    #obj = get_obj_linear(prices_linear_ref, demands_linear_ref, )
 
     obj_gda_linear_low = pd.read_csv('data/obj/obj_hist_gda_linear_low.csv')
     obj_gda_cd_low = pd.read_csv('data/obj/obj_hist_gda_cd_low.csv')
