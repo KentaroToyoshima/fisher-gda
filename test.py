@@ -77,7 +77,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
         print(f"------ Linear Fisher Market ------")
         prices_0  = np.random.rand(num_goods)*10 + 5
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate, demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
+        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
         
         prices_hist_gda_linear_all_low.append(prices_gda)
         demands_hist_gda_linear_all_low.append(demands_gda)
@@ -92,7 +92,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         
         print(f"------ Cobb-Douglas Fisher Market ------")
         prices_0  = np.random.rand(num_goods) + 5
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate, demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch)
+        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate[1], demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch)
         prices_hist_gda_cd_all_low.append(prices_gda)
         demands_hist_gda_cd_all_low.append(demands_gda)
         objective_values = []
@@ -106,7 +106,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         
         print(f"------ Leontief Fisher Market ------")
         prices_0  = np.random.rand(num_goods) + 10
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate, demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
+        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate[2], demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
         prices_hist_gda_leontief_all_low.append(prices_gda)
         demands_hist_gda_leontief_all_low.append(demands_gda)
         objective_values = []
@@ -146,7 +146,7 @@ if __name__ == '__main__':
     learning_rate_linear =  [0.9, 1]  #[price_lr, demand_lr]
     learning_rate_cd = [1.1, 0.1]
     learning_rate_leontief = [0.9, 0.1]
-    mutation_rate = 1
+    mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 300
     update_freq = 0
     arch = 'm-alg2'
