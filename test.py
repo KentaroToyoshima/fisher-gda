@@ -40,7 +40,7 @@ def get_obj_leontief(prices, demands, budgets, valuations):
 # Function that run Max-Oracle Gradient Descent and Nested Gradient Descent Ascent Tests and returns data
 # TODO:pricesの推移をプロット
 # TODO:demandの推移をプロット
-def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch):
+def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, dir_obj, dir_demands, dir_prices):
     
     prices_hist_gda_linear_all_low = []
     demands_hist_gda_linear_all_low = []
@@ -79,7 +79,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         prices_0  = np.random.rand(num_goods)*10 + 5
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate, demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
         
-        prices_hist_gda_linear_all_low.append(prices_gda)
+        prices_hist_gda_linear_all_low.append(prices_hist_gda)
         demands_hist_gda_linear_all_low.append(demands_gda)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
@@ -103,7 +103,6 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
             objective_values.append(obj)
         obj_hist_gda_cd_all_low.append(objective_values)
 
-        
         print(f"------ Leontief Fisher Market ------")
         prices_0  = np.random.rand(num_goods) + 10
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate, demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
@@ -115,7 +114,17 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
             p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
             obj = get_obj_leontief(p, x, budgets, valuations)
             objective_values.append(obj)
-        obj_hist_gda_leontief_all_low.append(objective_values)     
+        obj_hist_gda_leontief_all_low.append(objective_values)
+        
+        prices_hist_gda_linear_all_low = np.array(prices_hist_gda_linear_all_low)
+        prices_hist_gda_cd_all_low = np.array(prices_hist_gda_cd_all_low)
+        prices_hist_gda_leontief_all_low = np.array(prices_hist_gda_leontief_all_low)
+        prices_hist_gda_linear_all_low = pd.DataFrame(prices_hist_gda_linear_all_low) 
+        prices_hist_gda_cd_all_low = pd.DataFrame(prices_hist_gda_cd_all_low) 
+        prices_hist_gda_leontief_all_low = pd.DataFrame(prices_hist_gda_leontief_all_low) 
+        prices_hist_gda_linear_all_low.to_csv("{}/{}_prices_hist_gda_linear_{}.csv".format(dir_prices, arch, experiment_num))
+        prices_hist_gda_cd_all_low.to_csv("{}/{}_prices_hist_gda_cd_{}.csv".format(dir_prices, arch, experiment_num))
+        prices_hist_gda_leontief_all_low.to_csv("{}/{}_prices_hist_gda_leontief_{}.csv".format(dir_prices, arch, experiment_num))
     
     #NOTE:各効用関数でdemand,price,objを保存している
     return (prices_hist_gda_linear_all_low,
@@ -137,15 +146,14 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
             demands_hist_gda_leontief_all_high,
             obj_hist_gda_leontief_all_high)
 
-
 if __name__ == '__main__':
 
     num_experiments = 50
     num_buyers = 5
     num_goods = 8
-    learning_rate_linear =  [0.9, 1]  #[price_lr, demand_lr]
+    learning_rate_linear =  [0.95, 1]  #[price_lr, demand_lr]
     learning_rate_cd = [1.1, 0.1]
-    learning_rate_leontief = [0.9, 0.1]
+    learning_rate_leontief = [0.95, 0.1]
     mutation_rate = 1
     num_iters= 300
     update_freq = 0
@@ -233,7 +241,8 @@ if __name__ == '__main__':
                                                             demands_linear_ref, demands_cd_ref, demands_leontief_ref, 
                                                             prices_linear_ref, prices_cd_ref, prices_leontief_ref, 
                                                             learning_rate_linear, learning_rate_cd, learning_rate_leontief, 
-                                                            mutation_rate, num_experiments, num_iters, update_freq, arch)
+                                                            mutation_rate, num_experiments, num_iters, update_freq, arch,
+                                                            dir_obj, dir_demands, dir_prices)
 
     obj_hist_gda_linear_all_low = np.array(obj_hist_gda_linear_all_low)
     obj_hist_gda_cd_all_low = np.array(obj_hist_gda_cd_all_low)

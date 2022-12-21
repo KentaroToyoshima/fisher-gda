@@ -70,7 +70,6 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
         
         demands = demands.clip(min = 0) #Should remove logically but afraid things might break
         demands_hist.append(demands)
-        
 
     return (demands, prices, demands_hist, prices_hist)
 
