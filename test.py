@@ -42,26 +42,17 @@ def get_obj_leontief(prices, demands, budgets, valuations):
 # TODO:demandの推移をプロット
 def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, dir_obj, dir_demands, dir_prices):
     
-    prices_hist_gda_linear_all_low = []
     demands_hist_gda_linear_all_low = []
     obj_hist_gda_linear_all_low = []
-    prices_hist_gda_cd_all_low = []
     demands_hist_gda_cd_all_low = []
     obj_hist_gda_cd_all_low = []
-    prices_hist_gda_leontief_all_low = []
     demands_hist_gda_leontief_all_low = []
     obj_hist_gda_leontief_all_low = []
-    prices_hist_gda_linear_all_high = []
-    demands_hist_gda_linear_all_high = []
-    obj_hist_gda_linear_all_high = []
-    prices_hist_gda_cd_all_high = []
-    demands_hist_gda_cd_all_high = []
-    obj_hist_gda_cd_all_high = []
-    prices_hist_gda_leontief_all_high = []
-    demands_hist_gda_leontief_all_high = []
-    obj_hist_gda_leontief_all_high = []
 
     for experiment_num in range(num_experiments):
+        prices_hist_gda_linear_all_low = []
+        prices_hist_gda_cd_all_low = []
+        prices_hist_gda_leontief_all_low = []
         # Initialize random market parameters
         valuations = np.random.rand(num_buyers, num_goods)*10 + 5
         valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
@@ -93,7 +84,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         print(f"------ Cobb-Douglas Fisher Market ------")
         prices_0  = np.random.rand(num_goods) + 5
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate, demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch)
-        prices_hist_gda_cd_all_low.append(prices_gda)
+        prices_hist_gda_cd_all_low.append(prices_hist_gda)
         demands_hist_gda_cd_all_low.append(demands_gda)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
@@ -106,7 +97,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         print(f"------ Leontief Fisher Market ------")
         prices_0  = np.random.rand(num_goods) + 10
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate, demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
-        prices_hist_gda_leontief_all_low.append(prices_gda)
+        prices_hist_gda_leontief_all_low.append(prices_hist_gda)
         demands_hist_gda_leontief_all_low.append(demands_gda)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
@@ -116,9 +107,9 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
             objective_values.append(obj)
         obj_hist_gda_leontief_all_low.append(objective_values)
         
-        prices_hist_gda_linear_all_low = np.array(prices_hist_gda_linear_all_low)
-        prices_hist_gda_cd_all_low = np.array(prices_hist_gda_cd_all_low)
-        prices_hist_gda_leontief_all_low = np.array(prices_hist_gda_leontief_all_low)
+        prices_hist_gda_linear_all_low = np.array(prices_hist_gda_linear_all_low[0])
+        prices_hist_gda_cd_all_low = np.array(prices_hist_gda_cd_all_low[0])
+        prices_hist_gda_leontief_all_low = np.array(prices_hist_gda_leontief_all_low[0])
         prices_hist_gda_linear_all_low = pd.DataFrame(prices_hist_gda_linear_all_low) 
         prices_hist_gda_cd_all_low = pd.DataFrame(prices_hist_gda_cd_all_low) 
         prices_hist_gda_leontief_all_low = pd.DataFrame(prices_hist_gda_leontief_all_low) 
@@ -135,16 +126,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
             obj_hist_gda_cd_all_low,
             prices_hist_gda_leontief_all_low,
             demands_hist_gda_leontief_all_low,
-            obj_hist_gda_leontief_all_low,
-            prices_hist_gda_linear_all_high,
-            demands_hist_gda_linear_all_high,
-            obj_hist_gda_linear_all_high,
-            prices_hist_gda_cd_all_high,
-            demands_hist_gda_cd_all_high,
-            obj_hist_gda_cd_all_high,
-            prices_hist_gda_leontief_all_high,
-            demands_hist_gda_leontief_all_high,
-            obj_hist_gda_leontief_all_high)
+            obj_hist_gda_leontief_all_low)
 
 if __name__ == '__main__':
 
@@ -228,16 +210,7 @@ if __name__ == '__main__':
                 obj_hist_gda_cd_all_low,
                 prices_hist_gda_leontief_all_low,
                 demands_hist_gda_leontief_all_low,
-                obj_hist_gda_leontief_all_low,
-                prices_hist_gda_linear_all_high,
-                demands_hist_gda_linear_all_high,
-                obj_hist_gda_linear_all_high,
-                prices_hist_gda_cd_all_high,
-                demands_hist_gda_cd_all_high,
-                obj_hist_gda_cd_all_high,
-                prices_hist_gda_leontief_all_high,
-                demands_hist_gda_leontief_all_high,
-                obj_hist_gda_leontief_all_high) = run_test(num_buyers, num_goods,
+                obj_hist_gda_leontief_all_low) = run_test(num_buyers, num_goods,
                                                             demands_linear_ref, demands_cd_ref, demands_leontief_ref, 
                                                             prices_linear_ref, prices_cd_ref, prices_leontief_ref, 
                                                             learning_rate_linear, learning_rate_cd, learning_rate_leontief, 
