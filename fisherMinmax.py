@@ -46,7 +46,7 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
             prices_ref = np.copy(prices)
         
         prices = prices.clip(min=0.0001)
-        prices_hist.append(prices)
+        prices_hist.append(np.copy(prices))
 
         ### Demand Step ###
         # Gradient Step
@@ -69,7 +69,7 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
             demands = project_to_bugdet_set(demands, prices, budgets)
         
         demands = demands.clip(min = 0) #Should remove logically but afraid things might break
-        demands_hist.append(demands)
+        demands_hist.append(np.copy(demands))
 
     return (demands, prices, demands_hist, prices_hist)
 
@@ -103,7 +103,7 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
             prices_ref = np.copy(prices)
 
         prices = prices.clip(min=0.0001)
-        prices_hist.append(prices)
+        prices_hist.append(np.copy(prices))
 
         ### Demands Step ###
         # Gradient Step
@@ -128,7 +128,7 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
             demands = project_to_bugdet_set(demands, prices, budgets)
 
         demands = demands.clip(min = 0)
-        demands_hist.append(demands)
+        demands_hist.append(np.copy(demands))
         
 
     return (demands, prices, demands_hist, prices_hist)
@@ -162,7 +162,7 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             prices_ref = np.copy(prices)
 
         prices = prices.clip(min=0.00001)
-        prices_hist.append(prices)
+        prices_hist.append(np.copy(prices))
 
         ### Demands Step ###
         for buyer in range(budgets.shape[0]):
@@ -190,7 +190,7 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
             demands = project_to_bugdet_set(demands, prices, budgets)
         
         demands = demands.clip(min = 0)
-        demands_hist.append(demands)
+        demands_hist.append(np.copy(demands))
 
 
     return (demands, prices, demands_hist, prices_hist)

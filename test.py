@@ -71,6 +71,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
         prices_hist_gda_linear_all_low.append(prices_hist_gda)
         demands_hist_gda_linear_all_low.append(demands_gda)
+        #print(demands_hist_gda_linear_all_low)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
             x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
@@ -132,8 +133,8 @@ if __name__ == '__main__':
     num_experiments = 50
     num_buyers = 5
     num_goods = 8
-    learning_rate_linear =  [0.95, 1]  #[price_lr, demand_lr]
-    learning_rate_cd = [1.1, 0.1]
+    learning_rate_linear =  [0.9, 1]  #[price_lr, demand_lr]
+    learning_rate_cd = [0.9, 0.1]
     learning_rate_leontief = [0.9, 0.1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 300
