@@ -63,22 +63,20 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
     for experiment_num in range(num_experiments):
         # Initialize random market parameters
-        # NOTE:valuationとbudgetsを変えている
         valuations = np.random.rand(num_buyers, num_goods)*10 + 5
         valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
         budgets = np.random.rand(num_buyers)*10 + 10
         # budgets = np.array([15.71,  14.916, 13.519, 13.967, 19.407])
         demands_0 = np.random.rand(num_buyers, num_goods)
         #demands_0 = np.zeros(valuations.shape)
-        prices_0  = np.random.rand(num_goods)*10 + 5
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
-        print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n prices = {prices_0}")
+        print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
         print(f"*******************************")
         print(f"------------ GDA ------------")
 
         print(f"------ Linear Fisher Market ------")
-        
+        prices_0  = np.random.rand(num_goods)*10 + 5
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate, demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
         
         prices_hist_gda_linear_all_low.append(prices_gda)
@@ -93,7 +91,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         
         
         print(f"------ Cobb-Douglas Fisher Market ------")
-        
+        prices_0  = np.random.rand(num_goods) + 5
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate, demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch)
         prices_hist_gda_cd_all_low.append(prices_gda)
         demands_hist_gda_cd_all_low.append(demands_gda)
@@ -107,7 +105,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
         
         print(f"------ Leontief Fisher Market ------")
-        #prices_0  = np.random.rand(num_goods) + 10
+        prices_0  = np.random.rand(num_goods) + 10
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate, demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
         prices_hist_gda_leontief_all_low.append(prices_gda)
         demands_hist_gda_leontief_all_low.append(demands_gda)
@@ -142,12 +140,12 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
 if __name__ == '__main__':
 
-    num_experiments = 20
+    num_experiments = 50
     num_buyers = 5
     num_goods = 8
     learning_rate_linear =  [0.9, 1]  #[price_lr, demand_lr]
-    learning_rate_cd = [1.1, 1]
-    learning_rate_leontief = [0.9, 1]
+    learning_rate_cd = [1.1, 0.1]
+    learning_rate_leontief = [0.9, 0.1]
     mutation_rate = 1
     num_iters= 300
     update_freq = 0
