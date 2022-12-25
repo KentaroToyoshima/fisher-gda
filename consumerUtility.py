@@ -30,8 +30,9 @@ def get_leontief_utility(allocation, valuations):
 def get_CD_utility(allocation, valuations):
     # For easy of calculation, normalize valautions
     # This does not change the preference relation that the utility function represents
-    normalized_vals = valuations / np.sum(valuations)
-    return np.prod(np.power(allocation, normalized_vals))
+    #normalized_vals = valuations / np.sum(valuations)
+    #return np.prod(np.power(allocation, normalized_vals))
+    return np.prod(np.power(allocation, valuations))
     
 ############# Economic Function Definitions #############
 

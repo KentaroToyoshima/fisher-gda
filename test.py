@@ -17,6 +17,7 @@ def get_obj_linear(prices, demands, budgets, valuations):
         b = budgets[buyer]
         v = valuations[buyer,:]
         utils[buyer] = cu.get_linear_indirect_utill(prices.clip(min= 0.0001), b, v)
+        #utils[buyer] = cu.get_linear_utility(demands[buyer,:], v)
     # return np.sum(prices) + budgets.T @ np.log(utils) + np.sum(budgets) - np.sum(demands @ prices )
     return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.01))
 
@@ -26,7 +27,7 @@ def get_obj_cd(prices, demands, budgets, valuations):
         b = budgets[buyer]
         v = valuations[buyer,:]
         utils[buyer] = cu.get_CD_indirect_util(prices.clip(min= 0.0001), b, v)
-    
+        #utils[buyer] = cu.get_CD_utility(demands[buyer,:], v)
     return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001)) 
 
 def get_obj_leontief(prices, demands, budgets, valuations):
@@ -35,31 +36,31 @@ def get_obj_leontief(prices, demands, budgets, valuations):
         b = budgets[buyer]
         v = valuations[buyer,:]
         utils[buyer] = cu.get_leontief_indirect_util(prices.clip(min= 0.0001), b, v)
+        #utils[buyer] = cu.get_leontief_utility(demands[buyer,:], v)
     return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001)) 
 
 # Function that run Max-Oracle Gradient Descent and Nested Gradient Descent Ascent Tests and returns data
-# TODO:pricesの推移をプロット
 # TODO:demandの推移をプロット
 def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, dir_obj, dir_demands, dir_prices):
     
-    demands_hist_gda_linear_all_low = []
     obj_hist_gda_linear_all_low = []
-    demands_hist_gda_cd_all_low = []
     obj_hist_gda_cd_all_low = []
-    demands_hist_gda_leontief_all_low = []
     obj_hist_gda_leontief_all_low = []
 
     for experiment_num in range(num_experiments):
         prices_hist_gda_linear_all_low = []
         prices_hist_gda_cd_all_low = []
         prices_hist_gda_leontief_all_low = []
+        demands_hist_gda_linear_all_low = []
+        demands_hist_gda_cd_all_low = []
+        demands_hist_gda_leontief_all_low = []
         # Initialize random market parameters
         valuations = np.random.rand(num_buyers, num_goods)*10 + 5
         valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
         budgets = np.random.rand(num_buyers)*10 + 10
         # budgets = np.array([15.71,  14.916, 13.519, 13.967, 19.407])
-        demands_0 = np.random.rand(num_buyers, num_goods)
-        #demands_0 = np.zeros(valuations.shape)
+        #demands_0 = np.random.rand(num_buyers, num_goods)
+        demands_0 = np.zeros(valuations.shape)
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
@@ -70,8 +71,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         prices_0  = np.random.rand(num_goods)*10 + 5
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
         prices_hist_gda_linear_all_low.append(prices_hist_gda)
-        demands_hist_gda_linear_all_low.append(demands_gda)
-        #print(demands_hist_gda_linear_all_low)
+        demands_hist_gda_linear_all_low.append(demands_hist_gda)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
             x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
@@ -85,7 +85,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         prices_0  = np.random.rand(num_goods) + 5
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate[1], demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch)
         prices_hist_gda_cd_all_low.append(prices_hist_gda)
-        demands_hist_gda_cd_all_low.append(demands_gda)
+        demands_hist_gda_cd_all_low.append(demands_hist_gda)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
             x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
@@ -98,7 +98,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         prices_0  = np.random.rand(num_goods) + 10
         demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate[2], demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
         prices_hist_gda_leontief_all_low.append(prices_hist_gda)
-        demands_hist_gda_leontief_all_low.append(demands_gda)
+        demands_hist_gda_leontief_all_low.append(demands_hist_gda)
         objective_values = []
         for i in range(0, len(demands_hist_gda)):
             x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
@@ -116,6 +116,21 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         prices_hist_gda_linear_all_low.to_csv("{}/{}_prices_hist_gda_linear_{}.csv".format(dir_prices, arch, experiment_num))
         prices_hist_gda_cd_all_low.to_csv("{}/{}_prices_hist_gda_cd_{}.csv".format(dir_prices, arch, experiment_num))
         prices_hist_gda_leontief_all_low.to_csv("{}/{}_prices_hist_gda_leontief_{}.csv".format(dir_prices, arch, experiment_num))
+
+        demands_hist_gda_linear_all_low = np.array(demands_hist_gda_linear_all_low[0])
+        demands_hist_gda_cd_all_low = np.array(demands_hist_gda_cd_all_low[0])
+        demands_hist_gda_leontief_all_low = np.array(demands_hist_gda_leontief_all_low[0])
+        demands_hist_gda_linear_all_low = demands_hist_gda_linear_all_low.swapaxes(0,1)
+        demands_hist_gda_cd_all_low = demands_hist_gda_cd_all_low.swapaxes(0,1)
+        demands_hist_gda_leontief_all_low = demands_hist_gda_leontief_all_low.swapaxes(0,1)
+        
+        for buyer in range(num_buyers):
+            demands_hist_gda_linear_all = pd.DataFrame(demands_hist_gda_linear_all_low[buyer]) 
+            demands_hist_gda_cd_all = pd.DataFrame(demands_hist_gda_cd_all_low[buyer]) 
+            demands_hist_gda_leontief_all = pd.DataFrame(demands_hist_gda_leontief_all_low[buyer])
+            demands_hist_gda_linear_all.to_csv("{}/{}_demands_hist_gda_linear_{}_buyer_{}.csv".format(dir_demands, arch, experiment_num, buyer))
+            demands_hist_gda_cd_all.to_csv("{}/{}_demands_hist_gda_cd_{}_buyer_{}.csv".format(dir_demands, arch, experiment_num, buyer))
+            demands_hist_gda_leontief_all.to_csv("{}/{}_demands_hist_gda_leontief_{}_buyer_{}.csv".format(dir_demands, arch, experiment_num, buyer))
     
     #NOTE:各効用関数でdemand,price,objを保存している
     return (prices_hist_gda_linear_all_low,
@@ -130,16 +145,16 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
 if __name__ == '__main__':
 
-    num_experiments = 50
+    num_experiments = 10
     num_buyers = 5
     num_goods = 8
-    learning_rate_linear =  [0.9, 1]  #[price_lr, demand_lr]
-    learning_rate_cd = [0.9, 0.1]
-    learning_rate_leontief = [0.9, 0.1]
+    learning_rate_linear =  [1, 0.1]  #[price_lr, demand_lr]
+    learning_rate_cd = [1, 0.1]
+    learning_rate_leontief = [1, 0.1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 300
+    num_iters= 500
     update_freq = 0
-    arch = 'm-alg2'
+    arch = 'alg4'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
@@ -194,12 +209,23 @@ if __name__ == '__main__':
 [0.19435387768807794,0.1859283143415589,0.19023001142886942,0.18792336030600126,0.18723355777594416,0.18994284934439837,0.1782275204450602,0.19480714304994362]])
     prices_leontief_ref = np.array([10.55,   8.292, 10.686, 10.273,  6.996,  9.43,  11.713,  7.312])
     '''
+    '''
     demands_leontief_ref = np.array([[0.16690964247024526,0.21846739892633,0.1909901239144872,0.1818970280103424,0.1722902884050845,0.1717841543205905,0.21213255665790656,0.1879734022234504],
 [0.2106384804413337,0.1838506538152029,0.20969150584732804,0.17247546401269034,0.19741985216655406,0.2079426225077476,0.16617644016662073,0.19594067854381056],
 [0.1948824360486758,0.1797189540387727,0.1808319392906698,0.24399369161730894,0.22020690189796593,0.22460357521355237,0.19029420826303525,0.20743288879799202],
 [0.21638747714564688,0.1876567815742717,0.20953453116154255,0.16745256852712004,0.1940693670455123,0.19830574628829017,0.2001677775564986,0.19486708364026237],
 [0.18133120346429715,0.20178200432474985,0.18675927048866053,0.1902912683470696,0.20276200368905756,0.18157319210162318,0.2003162265802289,0.20115939534650734]])
     prices_leontief_ref = np.array([7.376,  8.275,  7.249, 3.733, 11.582, 15.649, 14.015,  4.139])
+    '''
+    demands_leontief_ref = np.array([[0.19390208048911095,0.19220917864873335,0.19656403260620897,0.19648171753194218,0.17918576274294395,0.17793491708795114,0.20984471787012993,0.1882996419795377],
+[0.1931032192617211,0.19370810888302642,0.18288167646040607,0.2012558481639905,0.173924217043141,0.18615263610945867,0.20477942805795366,0.2157558221166424],
+[0.1930468045928914,0.22455340470574123,0.20251390899102928,0.18746489328774532,0.2053368355349651,0.23555729722538182,0.2208308563353972,0.18349360660923372],
+[0.21347019696134742,0.19490987325647438,0.2009186406840245,0.20362795836681102,0.23218015434880593,0.19772786953288735,0.18396847404534875,0.1910209181182973],
+[0.1783267705183705,0.1769914154538792,0.18792892701302616,0.185286385399492,0.18266342409254785,0.16789708065984046,0.15434401156449973,0.20079940427245221]])
+
+    prices_leontief_ref = np.array([1e-05,1e-05,1e-05,1e-05,1e-05,1e-05,1e-05,87.71031009096859])
+    #prices_leontief_ref = np.array([1e-05,11.356530129627775,1e-05,9.265022574604739,1e-05,1e-05,52.285013075347244,1e-05])
+    #prices_leontief_ref = np.array([11,11,11,11,11,11,11,11])
 
     # results
     (prices_hist_gda_linear_all_low,
@@ -287,7 +313,7 @@ if __name__ == '__main__':
     
     for ax in axs.flat:
         ax.set(xlabel='Iteration Number', ylabel=r'Explotability')
-        ax.set_ylim(-0.1, 1)
+        #ax.set_ylim(-0.1, 1)
 
     fig.set_size_inches(18.5, 5.5)
     plt.rcParams["font.size"] = 18

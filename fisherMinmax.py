@@ -24,12 +24,14 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
     prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
+    prices_hist.append(np.copy(prices))
+    demands_hist.append(np.copy(demands))
+
     for iter in range(1, num_iters):
         if (not iter % 1000):
             print(f" ----- Iteration {iter}/{num_iters} ----- ")
         
         ### Price Step ###
-        # Gradient Step
         demand = np.sum(demands, axis = 0)
         excess_demand = demand - 1
         
@@ -49,7 +51,6 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
         prices_hist.append(np.copy(prices))
 
         ### Demand Step ###
-        # Gradient Step
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*valuations
         else:
@@ -70,7 +71,7 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
         
         demands = demands.clip(min = 0) #Should remove logically but afraid things might break
         demands_hist.append(np.copy(demands))
-
+        
     return (demands, prices, demands_hist, prices_hist)
 
 ############### Cobb-Douglas ###############
@@ -80,6 +81,8 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
     prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
+    prices_hist.append(np.copy(prices))
+    demands_hist.append(np.copy(demands))
 
     for iter in range(1, num_iters):
         if (not iter % 1000):
@@ -106,7 +109,6 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
         prices_hist.append(np.copy(prices))
 
         ### Demands Step ###
-        # Gradient Step
         if (decay_inner):
             demands += learning_rate[1]*iter**(-1/2)*(np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T
         else:
@@ -137,9 +139,11 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
  
 def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, decay_outer = False, decay_inner = False):
     demands = np.copy(demands_0)
-    prices = prices_0
+    prices = np.copy(prices_0)
     prices_hist = []
     demands_hist = []
+    prices_hist.append(np.copy(prices))
+    demands_hist.append(np.copy(demands))
     
     for iter in range(1, num_iters):
         if (not iter % 1000):
