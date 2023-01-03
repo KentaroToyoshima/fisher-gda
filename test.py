@@ -1,6 +1,7 @@
 
 import fisherMinmax as fm
 import numpy as np
+import random
 import os
 import datetime
 import matplotlib.pyplot as plt
@@ -37,7 +38,7 @@ def get_obj_leontief(prices, demands, budgets, valuations):
         v = valuations[buyer,:]
         utils[buyer] = cu.get_leontief_indirect_util(prices.clip(min= 0.0001), b, v)
         #utils[buyer] = cu.get_leontief_utility(demands[buyer,:], v)
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001)) 
+    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001))
 
 # Function that run Max-Oracle Gradient Descent and Nested Gradient Descent Ascent Tests and returns data
 # TODO:demandの推移をプロット
@@ -48,6 +49,8 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
     obj_hist_gda_leontief_all_low = []
 
     for experiment_num in range(num_experiments):
+        np.random.seed(experiment_num)
+        random.seed(experiment_num)
         prices_hist_gda_linear_all_low = []
         prices_hist_gda_cd_all_low = []
         prices_hist_gda_leontief_all_low = []
@@ -145,14 +148,14 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
 if __name__ == '__main__':
 
-    num_experiments = 10
+    num_experiments = 30
     num_buyers = 5
     num_goods = 8
-    learning_rate_linear =  [1, 0.1]  #[price_lr, demand_lr]
-    learning_rate_cd = [1, 0.1]
-    learning_rate_leontief = [1, 0.1]
+    learning_rate_linear =  [2, 1]  #[price_lr, demand_lr]
+    learning_rate_cd = [2, 1]
+    learning_rate_leontief = [2, 1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 500
+    num_iters= 1000
     update_freq = 0
     arch = 'alg4'
 
@@ -209,23 +212,24 @@ if __name__ == '__main__':
 [0.19435387768807794,0.1859283143415589,0.19023001142886942,0.18792336030600126,0.18723355777594416,0.18994284934439837,0.1782275204450602,0.19480714304994362]])
     prices_leontief_ref = np.array([10.55,   8.292, 10.686, 10.273,  6.996,  9.43,  11.713,  7.312])
     '''
-    '''
+    
     demands_leontief_ref = np.array([[0.16690964247024526,0.21846739892633,0.1909901239144872,0.1818970280103424,0.1722902884050845,0.1717841543205905,0.21213255665790656,0.1879734022234504],
 [0.2106384804413337,0.1838506538152029,0.20969150584732804,0.17247546401269034,0.19741985216655406,0.2079426225077476,0.16617644016662073,0.19594067854381056],
 [0.1948824360486758,0.1797189540387727,0.1808319392906698,0.24399369161730894,0.22020690189796593,0.22460357521355237,0.19029420826303525,0.20743288879799202],
 [0.21638747714564688,0.1876567815742717,0.20953453116154255,0.16745256852712004,0.1940693670455123,0.19830574628829017,0.2001677775564986,0.19486708364026237],
 [0.18133120346429715,0.20178200432474985,0.18675927048866053,0.1902912683470696,0.20276200368905756,0.18157319210162318,0.2003162265802289,0.20115939534650734]])
     prices_leontief_ref = np.array([7.376,  8.275,  7.249, 3.733, 11.582, 15.649, 14.015,  4.139])
+    #prices_leontief_ref = np.array([11,11,11,11,11,11,11,11])
+    #prices_leontief_ref = np.array([1.76612110e+01, 7.58249600e+00, 4.02669818e+00, 1.44980598e+01, 1.10000000e-05, 1.32743758e+01, 1.61819512e+01, 7.61927460e+00])
     '''
     demands_leontief_ref = np.array([[0.19390208048911095,0.19220917864873335,0.19656403260620897,0.19648171753194218,0.17918576274294395,0.17793491708795114,0.20984471787012993,0.1882996419795377],
 [0.1931032192617211,0.19370810888302642,0.18288167646040607,0.2012558481639905,0.173924217043141,0.18615263610945867,0.20477942805795366,0.2157558221166424],
 [0.1930468045928914,0.22455340470574123,0.20251390899102928,0.18746489328774532,0.2053368355349651,0.23555729722538182,0.2208308563353972,0.18349360660923372],
 [0.21347019696134742,0.19490987325647438,0.2009186406840245,0.20362795836681102,0.23218015434880593,0.19772786953288735,0.18396847404534875,0.1910209181182973],
 [0.1783267705183705,0.1769914154538792,0.18792892701302616,0.185286385399492,0.18266342409254785,0.16789708065984046,0.15434401156449973,0.20079940427245221]])
-
     prices_leontief_ref = np.array([1e-05,1e-05,1e-05,1e-05,1e-05,1e-05,1e-05,87.71031009096859])
-    #prices_leontief_ref = np.array([1e-05,11.356530129627775,1e-05,9.265022574604739,1e-05,1e-05,52.285013075347244,1e-05])
-    #prices_leontief_ref = np.array([11,11,11,11,11,11,11,11])
+    prices_leontief_ref = np.array([1e-05,11.356530129627775,1e-05,9.265022574604739,1e-05,1e-05,52.285013075347244,1e-05])
+    '''
 
     # results
     (prices_hist_gda_linear_all_low,

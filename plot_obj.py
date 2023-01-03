@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import consumerUtility as cu
 from datetime import date
+import glob
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
 
@@ -138,12 +139,13 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
 
 if __name__ == '__main__':
-    df_alg4_linear = pd.read_csv('data/obj/alg4_exploit_gda_linear_low.csv', index_col=0)
-    df_alg4_cd = pd.read_csv('data/obj/alg4_exploit_gda_cd_low.csv', index_col=0)
-    df_alg4_leontief = pd.read_csv('data/obj/alg4_exploit_gda_leontief_low.csv', index_col=0)
-    df_m_alg2_linear = pd.read_csv('data/obj/m-alg2_exploit_gda_linear_low.csv', index_col=0)
-    df_m_alg2_cd = pd.read_csv('data/obj/m-alg2_exploit_gda_cd_low.csv', index_col=0)
-    df_m_alg2_leontief = pd.read_csv('data/obj/m-alg2_exploit_gda_leontief_low.csv', index_col=0)
+    #file_ = glob.glob('{}/csv/trajectory_{}.csv'.format(dir_path, i_s))[0]
+    #df_alg4_linear = glob.glob('results/2022_12_26_04_03_28_408959_alg4_en_10_iters_500_ml_[1, 1, 1]_uf_0/data/prices/alg4_*_linear_[0-9].csv')
+    #df_alg4_cd = glob.glob('results/2022_12_26_04_03_28_408959_alg4_en_10_iters_500_ml_[1, 1, 1]_uf_0/data/prices/alg4_*_cd_[0-9].csv')
+    df_alg4_leontief = glob.glob('results/2022_12_26_04_03_28_408959_alg4_en_10_iters_500_ml_[1, 1, 1]_uf_0/data/prices/alg4_*_leontief_[0-9].csv')
+    #df_m_alg2_linear = pd.read_csv('data/obj/m-alg2_exploit_gda_linear_low.csv', index_col=0)
+    #df_m_alg2_cd = pd.read_csv('data/obj/m-alg2_exploit_gda_cd_low.csv', index_col=0)
+    #df_m_alg2_leontief = pd.read_csv('data/obj/m-alg2_exploit_gda_leontief_low.csv', index_col=0)
     
     #print(obj_gda_linear_low)
     #print(obj_gda_cd_low)
@@ -154,30 +156,30 @@ if __name__ == '__main__':
     # x_cd = np.linspace(1, num_iters_cd, num_iters_cd)
     # x_leontief = np.linspace(1, num_iters_leontief, num_iters_leontief)
 
-    fig, axes = plt.subplots(nrows=2, ncols=3, figsize=(25, 15))
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(25, 15))
 
-    df_alg4_linear.plot(ax=axes[0,0])
-    df_alg4_cd.plot(ax=axes[0,1])
+    #df_alg4_linear.plot(ax=axes[0,0])
+    #df_alg4_cd.plot(ax=axes[0,1])
     df_alg4_leontief.plot(ax=axes[0,2])
-    df_m_alg2_linear.plot(ax=axes[1,0])
-    df_m_alg2_cd.plot(ax=axes[1,1])
-    df_m_alg2_leontief.plot(ax=axes[1,2])
+    #df_m_alg2_linear.plot(ax=axes[1,0])
+    #df_m_alg2_cd.plot(ax=axes[1,1])
+    #df_m_alg2_leontief.plot(ax=axes[1,2])
 
-    for i in range(2):
+    for i in range(1):
         for j in range(3):
             axes[i,j].set_ylim(-0.1, 1)
             axes[i,j].tick_params(axis='x', labelsize=15)
             axes[i,j].tick_params(axis='y', labelsize=15)
             axes[i,j].grid(True)
 
-    axes[0, 0].set_title("Linear Market", fontsize=20)
-    axes[0, 1].set_title("Cobb-Douglas Martket", fontsize=20)
-    axes[0, 2].set_title("Leontief Martket", fontsize=20)
-    axes[0, 0].set_ylabel("Exploitability", fontsize=20)
-    axes[1, 0].set_ylabel("Exploitability", fontsize=20)
-    axes[1, 0].set_xlabel("Iterations", fontsize=20)
-    axes[1, 1].set_xlabel("Iterations", fontsize=20)
-    axes[1, 2].set_xlabel("Iterations", fontsize=20)
+    #axes[0, 0].set_title("Linear Market", fontsize=20)
+    #axes[0, 1].set_title("Cobb-Douglas Martket", fontsize=20)
+    #axes[0, 2].set_title("Leontief Martket", fontsize=20)
+    #axes[0, 0].set_ylabel("Exploitability", fontsize=20)
+    #axes[1, 0].set_ylabel("Exploitability", fontsize=20)
+    #axes[1, 0].set_xlabel("Iterations", fontsize=20)
+    #axes[1, 1].set_xlabel("Iterations", fontsize=20)
+    #axes[1, 2].set_xlabel("Iterations", fontsize=20)
     plt.show()
 
     plt.rcParams["font.size"] = 18

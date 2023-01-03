@@ -55,9 +55,9 @@ def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_ra
             demands += learning_rate[1]*iter**(-1/2)*valuations
         else:
             if arch == 'm-alg2':
-                demands += learning_rate[1]*(valuations - num_buyers*prices + mutation_rate*(demands_ref - demands))
+                demands += learning_rate[1]*(valuations - prices + mutation_rate*(demands_ref - demands))
             elif arch == 'alg2':
-                demands += learning_rate[1]*(valuations - num_buyers*prices)
+                demands += learning_rate[1]*(valuations - prices)
             elif arch == 'alg4':
                 demands += learning_rate[1]*valuations
             else:
@@ -113,9 +113,9 @@ def gda_cd(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, 
             demands += learning_rate[1]*iter**(-1/2)*(np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T
         else:
             if arch == 'm-alg2':
-                demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T) - num_buyers*prices + mutation_rate*(demands_ref - demands))
+                demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T) - prices + mutation_rate*(demands_ref - demands))
             elif arch == 'alg2':
-                demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)-num_buyers*prices)
+                demands += learning_rate[1]*(((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T) - prices)
             elif arch == 'alg4':
                 demands += learning_rate[1]*((np.prod(np.power(demands, valuations), axis = 1)*(valuations/demands.clip(min = 0.001)).T).T)
             else:
@@ -178,9 +178,9 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
                 demands[buyer,min_util_good] += learning_rate[1]*iter**(-1/2)*(1/(valuations[buyer, min_util_good]))
             else:
                 if arch == 'm-alg2':
-                    demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good])) - num_buyers*prices[min_util_good] + mutation_rate*(demands_ref[buyer, min_util_good] - demands[buyer, min_util_good]))
+                    demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good])) - prices[min_util_good] + mutation_rate*(demands_ref[buyer, min_util_good] - demands[buyer, min_util_good]))
                 elif arch == 'alg2':
-                    demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good]))-num_buyers*prices[min_util_good])
+                    demands[buyer,min_util_good] += learning_rate[1]*((1/(valuations[buyer, min_util_good])) - prices[min_util_good])
                 elif arch == 'alg4':
                     demands[buyer,min_util_good] += learning_rate[1]*(1/(valuations[buyer, min_util_good]))
                 else:
