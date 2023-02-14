@@ -22,10 +22,10 @@ def project_to_bugdet_set(X, p, b):
 def gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, decay_outer = False, decay_inner = False):
     demands = np.copy(demands_0)
     prices = np.copy(prices_0)
-    prices_hist = []
     demands_hist = []
-    prices_hist.append(np.copy(prices))
+    prices_hist = []
     demands_hist.append(np.copy(demands))
+    prices_hist.append(np.copy(prices))
 
     for iter in range(1, num_iters):
         if (not iter % 1000):

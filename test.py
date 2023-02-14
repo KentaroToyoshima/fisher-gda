@@ -1,4 +1,3 @@
-
 import fisherMinmax as fm
 import numpy as np
 import random
@@ -11,7 +10,6 @@ from datetime import date
 from pathlib import Path
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
-
 def get_obj_linear(prices, demands, budgets, valuations):
     utils = np.zeros(budgets.shape[0])
     for buyer in range(budgets.shape[0]):
@@ -158,7 +156,7 @@ if __name__ == '__main__':
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 1000
     update_freq = 0
-    arch = 'alg4'
+    arch = 'alg2'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
