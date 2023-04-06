@@ -1,12 +1,11 @@
 import fisherMinmax as fm
+import consumerUtility as cu
 import numpy as np
 import random
 import os
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
-import consumerUtility as cu
-from datetime import date
 from pathlib import Path
 import re
 
@@ -40,16 +39,14 @@ def get_obj_leontief(prices, demands, budgets, valuations):
     return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001))
 
 # Function that run Max-Oracle Gradient Descent and Nested Gradient Descent Ascent Tests and returns data
-# TODO:demandの推移をプロット
-
-def run_experiment(fm_func, get_obj, num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_freq, arch):
-    demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm_func(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_freq, arch)
+def run_experiment(fm_func, get_obj, market_type, num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_freq, arch):
+    demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm_func(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_freq, arch, market_type)
     objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(prices_hist_gda, demands_hist_gda)]
     return demands_hist_gda, prices_hist_gda, objective_values
 
-def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, dir_obj, dir_demands, dir_prices):
-    #TODO:3つともmain内で定義して，引数でrun_testに渡す．
-    results = {key: [] for key in ["linear", "cd", "leontief"]}
+#TODO:使っていないrefがあるのはなぜ？
+def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_type, dir_obj, dir_demands, dir_prices):
+    results = {key: [] for key in market_type}
 
     for experiment_num in range(num_experiments):
         np.random.seed(experiment_num)
@@ -67,17 +64,17 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         # Linear Fisher Market
         print(f"------ Linear Fisher Market ------")
         prices_0 = np.random.rand(num_goods) * 10 + 5
-        results["linear"].append(run_experiment(fm.gda_linear, get_obj_linear, num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
+        results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, market_type[0], num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
 
         # Cobb-Douglas Fisher Market
         print(f"------ Cobb-Douglas Fisher Market ------")
         prices_0 = np.random.rand(num_goods) + 5
-        results["cd"].append(run_experiment(fm.gda_cd, get_obj_cd, num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate[1], demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
+        results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, market_type[1], num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate[1], demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
 
         # Leontief Fisher Market
         print(f"------ Leontief Fisher Market ------")
         prices_0 = np.random.rand(num_goods) + 10
-        results["leontief"].append(run_experiment(fm.gda_leontief, get_obj_leontief, num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate[2], demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
+        results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, market_type[2], num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate[2], demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
 
         # Save data
         for key in results:
@@ -107,122 +104,37 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         results["leontief"],
     )
 
-
-#def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, dir_obj, dir_demands, dir_prices):
+# TODO:demandの推移をプロット
+def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch):
+        fig, axs = plt.subplots(1, 3)
     
-    obj_hist_gda_linear_all_low = []
-    obj_hist_gda_cd_all_low = []
-    obj_hist_gda_leontief_all_low = []
+        for i, (obj_hist, title) in enumerate(zip(obj_hist_data, plot_titles)):
+            mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
+            axs[i].plot(mean_obj, color="b")
+            axs[i].set_title(title, fontsize="medium")
+            axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability')
+            #axs[i].set_ylim(-0.05, 3)
 
-    for experiment_num in range(num_experiments):
-        np.random.seed(experiment_num)
-        random.seed(experiment_num)
-        prices_hist_gda_linear_all_low = []
-        prices_hist_gda_cd_all_low = []
-        prices_hist_gda_leontief_all_low = []
-        demands_hist_gda_linear_all_low = []
-        demands_hist_gda_cd_all_low = []
-        demands_hist_gda_leontief_all_low = []
-        # Initialize random market parameters
-        valuations = np.random.rand(num_buyers, num_goods)*10 + 5
-        valuations_cd = (valuations.T/ np.sum(valuations, axis = 1)).T # Normalize valuations for Cobb-Douglas
-        budgets = np.random.rand(num_buyers)*10 + 10
-        # budgets = np.array([15.71,  14.916, 13.519, 13.967, 19.407])
-        #demands_0 = np.random.rand(num_buyers, num_goods)
-        demands_0 = np.zeros(valuations.shape)
+        fig.set_size_inches(18.5, 5.5)
+        plt.rcParams["font.size"] = 18
+        plt.subplots_adjust(wspace=0.4)
+        plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
+        plt.show()
 
-        print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
-        print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
-        print(f"*******************************")
-        print(f"------------ GDA ------------")
-
-        print(f"------ Linear Fisher Market ------")
-        prices_0  = np.random.rand(num_goods)*10 + 5
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_linear(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch)
-        prices_hist_gda_linear_all_low.append(prices_hist_gda)
-        demands_hist_gda_linear_all_low.append(demands_hist_gda)
-        objective_values = []
-        for i in range(0, len(demands_hist_gda)):
-            x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            obj = get_obj_linear(p, x, budgets, valuations)
-            objective_values.append(obj)
-        obj_hist_gda_linear_all_low.append(objective_values)
-        
-        
-        print(f"------ Cobb-Douglas Fisher Market ------")
-        prices_0  = np.random.rand(num_goods) + 5
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_cd(num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate[1], demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch)
-        prices_hist_gda_cd_all_low.append(prices_hist_gda)
-        demands_hist_gda_cd_all_low.append(demands_hist_gda)
-        objective_values = []
-        for i in range(0, len(demands_hist_gda)):
-            x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            obj = get_obj_cd(p, x, budgets, valuations_cd)
-            objective_values.append(obj)
-        obj_hist_gda_cd_all_low.append(objective_values)
-
-        print(f"------ Leontief Fisher Market ------")
-        prices_0  = np.random.rand(num_goods) + 10
-        demands_gda, prices_gda, demands_hist_gda, prices_hist_gda = fm.gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate[2], demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch)
-        prices_hist_gda_leontief_all_low.append(prices_hist_gda)
-        demands_hist_gda_leontief_all_low.append(demands_hist_gda)
-        objective_values = []
-        for i in range(0, len(demands_hist_gda)):
-            x = np.mean(np.array(demands_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            p = np.mean(np.array(prices_hist_gda[:i+1]).clip(min = 0), axis = 0)
-            obj = get_obj_leontief(p, x, budgets, valuations)
-            objective_values.append(obj)
-        obj_hist_gda_leontief_all_low.append(objective_values)
-        
-        # データを格納
-        prices_hist_gda_linear_all_low = np.array(prices_hist_gda_linear_all_low[0])
-        prices_hist_gda_cd_all_low = np.array(prices_hist_gda_cd_all_low[0])
-        prices_hist_gda_leontief_all_low = np.array(prices_hist_gda_leontief_all_low[0])
-        prices_hist_gda_linear_all_low = pd.DataFrame(prices_hist_gda_linear_all_low) 
-        prices_hist_gda_cd_all_low = pd.DataFrame(prices_hist_gda_cd_all_low) 
-        prices_hist_gda_leontief_all_low = pd.DataFrame(prices_hist_gda_leontief_all_low) 
-        prices_hist_gda_linear_all_low.to_csv("{}/{}_prices_hist_gda_linear_{}.csv".format(dir_prices, arch, experiment_num))
-        prices_hist_gda_cd_all_low.to_csv("{}/{}_prices_hist_gda_cd_{}.csv".format(dir_prices, arch, experiment_num))
-        prices_hist_gda_leontief_all_low.to_csv("{}/{}_prices_hist_gda_leontief_{}.csv".format(dir_prices, arch, experiment_num))
-
-        demands_hist_gda_linear_all_low = np.array(demands_hist_gda_linear_all_low[0])
-        demands_hist_gda_cd_all_low = np.array(demands_hist_gda_cd_all_low[0])
-        demands_hist_gda_leontief_all_low = np.array(demands_hist_gda_leontief_all_low[0])
-        demands_hist_gda_linear_all_low = demands_hist_gda_linear_all_low.swapaxes(0,1)
-        demands_hist_gda_cd_all_low = demands_hist_gda_cd_all_low.swapaxes(0,1)
-        demands_hist_gda_leontief_all_low = demands_hist_gda_leontief_all_low.swapaxes(0,1)
-        
-        for buyer in range(num_buyers):
-            demands_hist_gda_linear_all = pd.DataFrame(demands_hist_gda_linear_all_low[buyer]) 
-            demands_hist_gda_cd_all = pd.DataFrame(demands_hist_gda_cd_all_low[buyer]) 
-            demands_hist_gda_leontief_all = pd.DataFrame(demands_hist_gda_leontief_all_low[buyer])
-            demands_hist_gda_linear_all.to_csv("{}/{}_demands_hist_gda_linear_{}_buyer_{}.csv".format(dir_demands, arch, experiment_num, buyer))
-            demands_hist_gda_cd_all.to_csv("{}/{}_demands_hist_gda_cd_{}_buyer_{}.csv".format(dir_demands, arch, experiment_num, buyer))
-            demands_hist_gda_leontief_all.to_csv("{}/{}_demands_hist_gda_leontief_{}_buyer_{}.csv".format(dir_demands, arch, experiment_num, buyer))
-    
-    #NOTE:各効用関数でdemand,price,objを保存している
-    return (prices_hist_gda_linear_all_low,
-            demands_hist_gda_linear_all_low,
-            obj_hist_gda_linear_all_low,
-            prices_hist_gda_cd_all_low,
-            demands_hist_gda_cd_all_low,
-            obj_hist_gda_cd_all_low,
-            prices_hist_gda_leontief_all_low,
-            demands_hist_gda_leontief_all_low,
-            obj_hist_gda_leontief_all_low)
+def get_dataframes(pattern, dir_content, dir_obj):
+    files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
+    return [pd.read_csv(file, index_col=0) for file in files]
 
 if __name__ == '__main__':
-
-    num_experiments = 2
+    market_type = ['linear', 'cd', 'leontief']
+    num_experiments = 10
     num_buyers = 5
     num_goods = 8
-    learning_rate_linear =  [2, 1]  #[price_lr, demand_lr]
-    learning_rate_cd = [2, 1]
-    learning_rate_leontief = [2, 1]
+    learning_rate_linear =  [2, 0.1]  #[price_lr, demand_lr]
+    learning_rate_cd = [2, 0.1]
+    learning_rate_leontief = [2, 0.1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 1000
+    num_iters= 2000
     update_freq = 0
     arch = 'alg2'
 
@@ -299,139 +211,11 @@ if __name__ == '__main__':
     '''
 
     # results
-    (results_linear, results_cd, results_leontief) = run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, dir_obj, dir_demands, dir_prices)
-    #(prices_hist_gda_linear_all_low,
-    #            demands_hist_gda_linear_all_low,
-    #            obj_hist_gda_linear_all_low,
-    #            prices_hist_gda_cd_all_low,
-    #            demands_hist_gda_cd_all_low,
-    #            obj_hist_gda_cd_all_low,
-    #            prices_hist_gda_leontief_all_low,
-    #            demands_hist_gda_leontief_all_low,
-    #            obj_hist_gda_leontief_all_low) = run_test(num_buyers, num_goods,
-    #                                                        demands_linear_ref, demands_cd_ref, demands_leontief_ref, 
-    #                                                        prices_linear_ref, prices_cd_ref, prices_leontief_ref, 
-    #                                                        learning_rate_linear, learning_rate_cd, learning_rate_leontief, 
-    #                                                        mutation_rate, num_experiments, num_iters, update_freq, arch,
-    #                                                        dir_obj, dir_demands, dir_prices)
+    (results_linear, results_cd, results_leontief) = run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_type, dir_obj, dir_demands, dir_prices)
 
-    # plot
-    #obj_hist_gda_linear_all_low = np.array(obj_hist_gda_linear_all_low)
-    #obj_hist_gda_cd_all_low = np.array(obj_hist_gda_cd_all_low)
-    #obj_hist_gda_leontief_all_low = np.array(obj_hist_gda_leontief_all_low)
-
-    #obj_hist_gda_linear_low =  pd.DataFrame( obj_hist_gda_linear_all_low)
-    #obj_hist_gda_cd_low =  pd.DataFrame(obj_hist_gda_cd_all_low)
-    #obj_hist_gda_leontief_low =  pd.DataFrame( obj_hist_gda_leontief_all_low)
-
-    #obj_hist_gda_linear_low.to_csv("{}/{}_obj_hist_gda_linear_low.csv".format(dir_obj, arch))
-    #obj_hist_gda_cd_low.to_csv("{}/{}_obj_hist_gda_cd_low.csv".format(dir_obj, arch))
-    #obj_hist_gda_leontief_low.to_csv("{}/{}_obj_hist_gda_leontief_low.csv".format(dir_obj, arch))
-
-    #prices_hist_gda_linear_all_low = np.array(prices_hist_gda_linear_all_low)
-    #prices_hist_gda_cd_all_low = np.array(prices_hist_gda_cd_all_low)
-    #prices_hist_gda_leontief_all_low = np.array(prices_hist_gda_leontief_all_low)
-
-    #prices_gda_linear_low =  pd.DataFrame(prices_hist_gda_linear_all_low)
-    #prices_gda_cd_low =  pd.DataFrame(prices_hist_gda_cd_all_low)
-    #prices_gda_leontief_low =  pd.DataFrame( prices_hist_gda_leontief_all_low)
-
-    #prices_gda_linear_low.to_csv("{}/{}_prices_gda_linear_low.csv".format(dir_prices, arch))
-    #prices_gda_cd_low.to_csv("{}/{}_prices_gda_cd_low.csv".format(dir_prices, arch))
-    #prices_gda_leontief_low.to_csv("{}/{}_prices_gda_leontief_low.csv".format(dir_prices, arch))
-
-    #print(np.mean(prices_hist_gda_linear_all_low, axis=0))
-    #print(np.mean(prices_hist_gda_cd_all_low, axis=0))
-    #print(np.mean(prices_hist_gda_leontief_all_low, axis=0))
-
-    #demands_hist_gda_linear_all_low = np.array(np.mean(demands_hist_gda_linear_all_low, axis=0))
-    #demands_hist_gda_cd_all_low = np.array(np.mean(demands_hist_gda_cd_all_low, axis=0))
-    #demands_hist_gda_leontief_all_low = np.array(np.mean(demands_hist_gda_leontief_all_low, axis=0))
-
-    #demands_gda_linear_low =  pd.DataFrame(demands_hist_gda_linear_all_low)
-    #demands_gda_cd_low =  pd.DataFrame(demands_hist_gda_cd_all_low)
-    #demands_gda_leontief_low =  pd.DataFrame(demands_hist_gda_leontief_all_low)
-
-    #demands_gda_linear_low.to_csv("{}/{}_demands_gda_linear_low.csv".format(dir_demands, arch))
-    #demands_gda_cd_low.to_csv("{}/{}_demands_gda_cd_low.csv".format(dir_demands, arch))
-    #demands_gda_leontief_low.to_csv("{}/{}_demands_gda_leontief_low.csv".format(dir_demands, arch))
-
-    #obj_gda_linear_low = np.mean(obj_hist_gda_linear_all_low, axis = 0)
-    #obj_gda_cd_low = np.mean(obj_hist_gda_cd_all_low, axis = 0)
-    #obj_gda_leontief_low = np.mean(obj_hist_gda_leontief_all_low, axis = 0)
-
-    #obj_gda_linear_low = obj_gda_linear_low - np.min(obj_gda_linear_low)
-    #obj_gda_cd_low = obj_gda_cd_low - np.min(obj_gda_cd_low)
-    #obj_gda_leontief_low = obj_gda_leontief_low - np.min(obj_gda_leontief_low)
-
-    #num_iters_linear = len(obj_gda_linear_low)
-    #num_iters_cd = len(obj_gda_cd_low)
-    #num_iters_leontief = len(obj_gda_leontief_low)
-    # x_linear = np.linspace(1, num_iters_linear, num_iters_linear)
-    # x_cd = np.linspace(1, num_iters_cd, num_iters_cd)
-    # x_leontief = np.linspace(1, num_iters_leontief, num_iters_leontief)
-
-    #fig, axs = plt.subplots(1, 3)
-    
-    # Add shift in plots to make the difference clearer
-    #axs[0].plot([iter for iter in range(num_iters_linear)], obj_gda_linear_low, color = "b")
-    #axs[0].set_title("Linear Market", fontsize = "medium")
-
-    #axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low, color = "b")
-    #axs[1].set_title("Cobb-Douglas Market", fontsize = "medium")
-
-    #axs[2].plot([iter for iter in range(num_iters_leontief)], obj_gda_leontief_low, color = "b")
-    #axs[2].set_title("Leontief Market", fontsize = "medium")
-    
-    #for ax in axs.flat:
-    #    ax.set(xlabel='Iteration Number', ylabel=r'Explotability')
-    #    #ax.set_ylim(-0.1, 1)
-
-    #fig.set_size_inches(18.5, 5.5)
-    #plt.rcParams["font.size"] = 18
-    #plt.subplots_adjust(wspace=0.4)
-    #plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
-    #plt.show()
-    #obj_gda_linear_low = pd.DataFrame(obj_gda_linear_low)
-    #obj_gda_cd_low = pd.DataFrame(obj_gda_cd_low)
-    #obj_gda_leontief_low = pd.DataFrame(obj_gda_leontief_low)
-    #obj_gda_linear_low.to_csv("{}/{}_exploit_gda_linear_low.csv".format(dir_obj, arch))
-    #obj_gda_cd_low.to_csv("{}/{}_exploit_gda_cd_low.csv".format(dir_obj, arch))
-    #obj_gda_leontief_low.to_csv("{}/{}_exploit_gda_leontief_low.csv".format(dir_obj, arch))
-
-    #TODO:データの平均値を取る方法を考える
-    def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch):
-        fig, axs = plt.subplots(1, 3)
-    
-        for i, (obj_hist, title) in enumerate(zip(obj_hist_data, plot_titles)):
-            mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
-            axs[i].plot(mean_obj, color="b")
-            axs[i].set_title(title, fontsize="medium")
-            axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability')
-            #pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_{file_prefix[i]}.csv")
-            pd.DataFrame([mean_obj]).to_csv(f"{dir_obj}/{arch}_exploit_{file_prefix[i]}.csv")
-
-        fig.set_size_inches(18.5, 5.5)
-        plt.rcParams["font.size"] = 18
-        plt.subplots_adjust(wspace=0.4)
-        plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
-        plt.show()
-
-    #TODO:linearとcdとleontiefで同じことをやっているので，まとめる
     dir_content = os.listdir(dir_obj)
-    pattern = r'.*linear.*\.csv'
-    linear_files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
-    dataframes = [pd.read_csv(file, index_col=0) for file in linear_files]
-    linear_mean_dataframe = pd.concat(dataframes, axis=1).mean(axis=1)
-    pattern = r'.*cd.*\.csv'
-    cd_files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
-    dataframes = [pd.read_csv(file, index_col=0) for file in linear_files]
-    cd_mean_dataframe = pd.concat(dataframes).groupby(level=0).mean()
-    pattern = r'.*leontief.*\.csv'
-    leontief_files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
-    dataframes = [pd.read_csv(file, index_col=0) for file in linear_files]
-    leontief_mean_dataframe = pd.concat(dataframes).groupby(level=0).mean()
-    obj_hist_data = [linear_mean_dataframe, cd_mean_dataframe, leontief_mean_dataframe]
+    patterns = [rf'.*{key}.*\.csv' for key in market_type]
+    obj_hist_data = [get_dataframes(pattern, dir_content, dir_obj) for pattern in patterns]
     plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
     file_prefix = ["gda_linear_low", "gda_cd_low", "gda_leontief_low"]
 

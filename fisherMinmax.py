@@ -5,7 +5,7 @@ import cvxpy as cp
 import consumerUtility as cu
 np.set_printoptions(precision=3)
 
-
+#TODO:将来的に，確率的勾配降下法の実装も考えたほうが良い？
 ############# Projection onto affine positive half-space, i.e., budget set ###############
 def project_to_bugdet_set(X, p, b):
     X_prec = X
@@ -196,5 +196,65 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
         demands = demands.clip(min = 0)
         demands_hist.append(np.copy(demands))
 
+
+    return (demands, prices, demands_hist, prices_hist)
+
+def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, market_type, decay_outer=False, decay_inner=False):
+    demands = np.copy(demands_0)
+    prices = np.copy(prices_0)
+    prices_hist = []
+    demands_hist = []
+    prices_hist.append(np.copy(prices))
+    demands_hist.append(np.copy(demands))
+
+    for iter in range(1, num_iters):
+        if not iter % 1000:
+            print(f" ----- Iteration {iter}/{num_iters} ----- ")
+
+        # Price Step
+        demand = np.sum(demands, axis=0)
+        excess_demand = demand - 1
+
+        step_size = learning_rate[0] * excess_demand
+        if decay_outer:
+            step_size *= iter ** (-1 / 2)
+        if arch == 'm-alg2':
+            step_size += mutation_rate * (prices_ref - prices)
+        prices += step_size * (prices > 0)
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
+            prices_ref = np.copy(prices)
+        prices = prices.clip(min=0.0001)
+        prices_hist.append(np.copy(prices))
+
+        # Demand Step
+        if market_type == 'linear':
+            demands_grad = valuations
+        elif market_type == 'cd':
+            demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.001)).T).T
+        elif market_type == 'leontief':
+            demands_grad = np.zeros_like(demands)
+            for buyer in range(budgets.shape[0]):
+                min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
+                demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+        else:
+            print('error')
+            exit()
+
+        if decay_inner:
+            demands_grad *= iter ** (-1 / 2)
+        if arch == 'm-alg2':
+            demands_grad += mutation_rate * (demands_ref - demands)
+        if arch != 'alg4':
+            demands_grad -= prices
+
+        demands += learning_rate[1] * demands_grad
+        if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
+            demands_ref = np.copy(demands)
+
+        # Projection step
+        if arch == 'alg4':
+            demands = project_to_bugdet_set(demands, prices, budgets)
+        demands = demands.clip(min=0)
+        demands_hist.append(np.copy(demands))
 
     return (demands, prices, demands_hist, prices_hist)
