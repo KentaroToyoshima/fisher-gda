@@ -215,12 +215,12 @@ def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate
         demand = np.sum(demands, axis=0)
         excess_demand = demand - 1
 
-        step_size = learning_rate[0] * excess_demand
+        step_size = excess_demand
         if decay_outer:
             step_size *= iter ** (-1 / 2)
         if arch == 'm-alg2':
             step_size += mutation_rate * (prices_ref - prices)
-        prices += step_size * (prices > 0)
+        prices += learning_rate[0] * step_size * (prices > 0)
         if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
             prices_ref = np.copy(prices)
         prices = prices.clip(min=0.0001)
