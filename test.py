@@ -127,14 +127,14 @@ def get_dataframes(pattern, dir_content, dir_obj):
 
 if __name__ == '__main__':
     market_type = ['linear', 'cd', 'leontief']
-    num_experiments = 10
+    num_experiments = 1
     num_buyers = 5
     num_goods = 8
     learning_rate_linear =  [2, 0.1]  #[price_lr, demand_lr]
     learning_rate_cd = [2, 0.1]
     learning_rate_leontief = [2, 0.1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 2000
+    num_iters= 500
     update_freq = 0
     arch = 'alg2'
 
