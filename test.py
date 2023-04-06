@@ -45,6 +45,7 @@ def run_experiment(fm_func, get_obj, market_type, num_buyers, valuations, budget
     return demands_hist_gda, prices_hist_gda, objective_values
 
 #TODO:使っていないrefがあるのはなぜ？
+#TODO:run_testがおかしい気がする
 def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_type, dir_obj, dir_demands, dir_prices):
     results = {key: [] for key in market_type}
 
