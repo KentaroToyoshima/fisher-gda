@@ -108,12 +108,13 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch):
         fig, axs = plt.subplots(1, 3)
     
-        for i, (obj_hist, title) in enumerate(zip(obj_hist_data, plot_titles)):
+        for i, (obj_hist, title, market) in enumerate(zip(obj_hist_data, plot_titles, file_prefix)):
             mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
             axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability')
             #axs[i].set_ylim(-0.05, 3)
+            pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market}.csv")
 
         fig.set_size_inches(18.5, 5.5)
         plt.rcParams["font.size"] = 18
@@ -217,6 +218,6 @@ if __name__ == '__main__':
     patterns = [rf'.*{key}.*\.csv' for key in market_type]
     obj_hist_data = [get_dataframes(pattern, dir_content, dir_obj) for pattern in patterns]
     plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
-    file_prefix = ["gda_linear_low", "gda_cd_low", "gda_leontief_low"]
+    file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
 
     plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch)
