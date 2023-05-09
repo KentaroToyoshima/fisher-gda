@@ -55,6 +55,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         budgets = np.random.rand(num_buyers) * 10 + 10
         #demands_0 = np.zeros(valuations.shape)
         demands_0 = np.random.rand(num_buyers, num_goods)
+        prices_0 = np.random.rand(num_goods) * 5
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
@@ -63,17 +64,16 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
 
         # Linear Fisher Market
         print(f"------ Linear Fisher Market ------")
-        prices_0 = np.random.rand(num_goods) * 10 + 5
         results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, market_types[0], num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_linear, mutation_rate[0], demands_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
 
         # Cobb-Douglas Fisher Market
         print(f"------ Cobb-Douglas Fisher Market ------")
-        prices_0 = np.random.rand(num_goods) + 5
+        #prices_0 = np.random.rand(num_goods)
         results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, market_types[1], num_buyers, valuations_cd, budgets, demands_0, prices_0, learning_rate_cd, mutation_rate[1], demands_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
 
         # Leontief Fisher Market
         print(f"------ Leontief Fisher Market ------")
-        prices_0 = np.random.rand(num_goods) + 10
+        #prices_0 = np.random.rand(num_goods)
         results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, market_types[2], num_buyers, valuations, budgets, demands_0, prices_0, learning_rate_leontief, mutation_rate[2], demands_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
 
         # Save data
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     learning_rate_cd = [2, 0.1]
     learning_rate_leontief = [2, 0.1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 500
+    num_iters= 1000
     update_freq = 0
     arch = 'alg2'
 
