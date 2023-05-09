@@ -53,7 +53,8 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         valuations = np.random.rand(num_buyers, num_goods) * 10 + 5
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
-        demands_0 = np.zeros(valuations.shape)
+        #demands_0 = np.zeros(valuations.shape)
+        demands_0 = np.random.rand(num_buyers, num_goods)
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
