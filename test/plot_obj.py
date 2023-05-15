@@ -160,7 +160,7 @@ if __name__ == '__main__':
 
     #df_alg4_linear.plot(ax=axes[0,0])
     #df_alg4_cd.plot(ax=axes[0,1])
-    df_alg4_leontief.plot(ax=axes[0,2])
+    #df_alg4_leontief.plot(ax=axes[0,2])
     #df_m_alg2_linear.plot(ax=axes[1,0])
     #df_m_alg2_cd.plot(ax=axes[1,1])
     #df_m_alg2_leontief.plot(ax=axes[1,2])

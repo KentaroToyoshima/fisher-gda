@@ -104,7 +104,6 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         results["leontief"],
     )
 
-# TODO:demandの推移をプロット
 def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch):
         fig, axs = plt.subplots(1, 3)
     
@@ -122,13 +121,36 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, d
         plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
         plt.show()
 
+# TODO:demandの推移をプロット
+def plot_and_save_demand_graphs(demands_hist_data, plot_titles, file_prefix, dir_demands, dir_graphs, arch):
+    pass
+
+# TODO:線の色を変える
+# TODO:グラフの枠サイズを変える
+def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch):
+    fig, axs = plt.subplots(1, 3)
+    
+    for i, (prices_hist, title, market) in enumerate(zip(prices_hist_data, plot_titles, file_prefix)):
+        mean_prices = np.mean(prices_hist, axis=0)
+        axs[i].plot(mean_prices, color="b")
+        axs[i].set_title(title, fontsize="medium")
+        axs[i].set(xlabel='Iteration Number', ylabel=r'prices')
+        #axs[i].set_ylim(-0.05, 3)
+        pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market}.csv")
+
+    fig.set_size_inches(18.5, 5.5)
+    plt.rcParams["font.size"] = 18
+    plt.subplots_adjust(wspace=0.4)
+    plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
+    plt.show()
+
 def get_dataframes(pattern, dir_content, dir_obj):
     files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
     return [pd.read_csv(file, index_col=0) for file in files]
 
 if __name__ == '__main__':
     market_types = ['linear', 'cd', 'leontief']
-    num_experiments = 1
+    num_experiments = 5
     num_buyers = 5
     num_goods = 8
     learning_rate_linear =  [2, 0.1]  #[price_lr, demand_lr]
@@ -137,7 +159,7 @@ if __name__ == '__main__':
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 1000
     update_freq = 0
-    arch = 'm-alg2'
+    arch = 'alg4'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
@@ -214,10 +236,13 @@ if __name__ == '__main__':
     # results
     (results_linear, results_cd, results_leontief) = run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_types, dir_obj, dir_demands, dir_prices)
 
-    dir_content = os.listdir(dir_obj)
     patterns = [rf'.*{key}.*\.csv' for key in market_types]
+    dir_content = os.listdir(dir_obj)
     obj_hist_data = [get_dataframes(pattern, dir_content, dir_obj) for pattern in patterns]
+    dir_content = os.listdir(dir_prices)
+    prices_hist_data = [get_dataframes(pattern, dir_content, dir_prices) for pattern in patterns]
     plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
     file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
 
     plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch)
+    plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch)
