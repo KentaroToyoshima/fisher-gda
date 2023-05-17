@@ -56,9 +56,8 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         valuations = np.random.rand(num_buyers, num_goods) * 10 + 5
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
-        #demands_0 = np.zeros(valuations.shape)
         demands_0 = np.random.rand(num_buyers, num_goods)
-        prices_0 = np.random.rand(num_goods) * 5
+        prices_0 = np.random.rand(num_goods)
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
@@ -100,7 +99,6 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
             df_obj = pd.DataFrame(obj_hist_all)
             df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_gda_{key}_{experiment_num}.csv")
 
-    #TODO:返り値が必要か考える
     return (
         results["linear"],
         results["cd"],
@@ -108,6 +106,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
     )
 
 def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch):
+        print("plotting exploitability graphs...")
         fig, axs = plt.subplots(1, 3)
     
         for i, (obj_hist, title, market) in enumerate(zip(obj_hist_data, plot_titles, file_prefix)):
@@ -118,52 +117,14 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, d
             #axs[i].set_ylim(-0.05, 3)
             pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market}.csv")
 
-        fig.set_size_inches(18.5, 5.5)
-        plt.rcParams["font.size"] = 18
-        plt.subplots_adjust(wspace=0.4)
-        plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
-
-def create_average_file(market_type, buyer_num, dir_path, arch):
-    file_pattern = f"{dir_path}/{arch}_demands_hist_{market_type}_*_buyer_{buyer_num}.csv"
-    file_list = glob.glob(file_pattern)
-
-    if not file_list:
-        print("No files found.")
-        return
-
-    dfs = [pd.read_csv(file) for file in file_list]
-
-    df_concat = pd.concat(dfs)
-    df_mean = df_concat.groupby(df_concat.index).mean()
-
-    output_file = f"{dir_path}/{arch}_demands_hist_{market_type}_average_buyer_{buyer_num}.csv"
-    df_mean.to_csv(output_file, index=False)
-
-def plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graphs, arch, num_buyers):
-    fig, axs = plt.subplots()
-    
-    for market_type, buyer in itertools.product(file_prefix, range(num_buyers)):
-        create_average_file(market_type, buyer, dir_demands, arch)
-    #TODO:ファイル名を指定する
-    file_pattern = f"{arch}_demands_hist_*_average_*.csv"
-    file_list = glob.glob(f"{dir_demands}/{file_pattern}")
-    dfs = [pd.read_csv(file, index_col=0) for file in file_list]
-    for i, df in enumerate(dfs):
-        df.plot()
         fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 18
         plt.subplots_adjust(wspace=0.4)
-        plt.savefig(f"{dir_graphs}/{arch}_demand_graphs_{i}.jpg")
-        #axs[i].set_ylim(-0.05, 3)
-        #pd.DataFrame(df).to_csv(f"{dir_demands}/{arch}_demands_hist_{market}.csv")
-    
-    
-    #patterns = [rf'.*{key}.*\.csv' for key in market_types]
-    #dir_content = os.listdir(dir_prices)
-    #prices_hist_data = [get_dataframes(pattern, dir_content, dir_prices) for pattern in patterns]
-
+        plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
+        plt.close()
 
 def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch):
+    print("plotting prices graphs...")
     fig, axs = plt.subplots(1, 3)
     
     for i, (prices_hist, title, market) in enumerate(zip(prices_hist_data, plot_titles, file_prefix)):
@@ -171,7 +132,6 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_
         axs[i].plot(mean_prices)
         axs[i].set_title(title, fontsize="medium")
         axs[i].set(xlabel='Iteration Number', ylabel=r'prices')
-        #axs[i].set_ylim(-0.05, 3)
         pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market}_average.csv")
 
     fig.set_size_inches(25.5, 5.5)
@@ -179,51 +139,61 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_
     plt.subplots_adjust(wspace=0.4)
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
+    plt.close()
 
-"""
-def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch):
-    fig, axs = plt.subplots(1, 3)
-    
-    # matplotlibの色サイクルを取得
-    colors = plt.rcParams['axes.prop_cycle'].by_key()['color']
+def plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graphs, arch, num_buyers):
+    print("plotting demands graphs...")
+    fig, axs = plt.subplots()
+    plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
+    file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
 
-    for i, (prices_hist, title, market) in enumerate(zip(prices_hist_data, plot_titles, file_prefix)):
-        mean_prices = np.mean(prices_hist, axis=0)
-        # 色サイクルから色を選択
-        axs[i].plot(mean_prices, color=colors[i % len(colors)])
-        axs[i].set_title(title, fontsize="medium")
-        axs[i].set(xlabel='Iteration Number', ylabel=r'prices')
-        #axs[i].set_ylim(-0.05, 3)
-        pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market}.csv")
+    for market_type, plot_title in zip(file_prefix, plot_titles):
+        for buyer in range(num_buyers):
+            file_pattern = f"{dir_demands}/{arch}_demands_hist_{market_type}_*_buyer_{buyer}.csv"
+            file_list = glob.glob(file_pattern)
+            if not file_list:
+                print("No files found.")
+                return
 
-    fig.set_size_inches(18.5, 5.5)
-    plt.rcParams["font.size"] = 18
-    plt.subplots_adjust(wspace=0.4)
-    plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
-    plt.show()
-"""
+            dfs = [pd.read_csv(file, index_col=0) for file in file_list]
+
+            df_concat = pd.concat(dfs)
+            df_mean = df_concat.groupby(df_concat.index).mean()
+
+            fig, axs = plt.subplots()
+            df_mean.plot()
+            fig.set_size_inches(25.5, 5.5)
+            plt.title(plot_title+' buyer '+str(buyer), fontsize="medium")
+            plt.xlabel('Iteration Number')
+            plt.ylabel('Demand')
+            plt.rcParams["font.size"] = 18
+            plt.subplots_adjust(wspace=0.4)
+            plt.savefig(f"{dir_graphs}/{arch}_demands_graphs_{market_type}_buyer_{buyer}.jpg")
+            plt.close()
 
 def get_dataframes(pattern, dir_content, dir_obj):
     files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
     return [pd.read_csv(file, index_col=0) for file in files]
 
 if __name__ == '__main__':
+    #TODO:main()にする
+    #TODO:コマンドライン引数にする
+    #NOTE:このパラメータでcd上手くいきます
     market_types = ['linear', 'cd', 'leontief']
     num_experiments = 3
     num_buyers = 5
     num_goods = 8
-    learning_rate_linear =  [2, 0.1]  #[price_lr, demand_lr]
-    learning_rate_cd = [2, 0.1]
-    learning_rate_leontief = [2, 0.1]
+    learning_rate_linear = [2, 0.1]  #[price_lr, demand_lr]
+    learning_rate_cd = [0.01, 0.01]
+    learning_rate_leontief = [0.01, 0.1]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 1000
+    num_iters= 3000
     update_freq = 0
-    arch = 'alg4'
+    arch = 'alg2'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
-    #TODO:ファイル名変える
-    dir_data = Path(f"results/{nowdate}_{arch}_en_{num_experiments}_iters_{num_iters}_uf_{update_freq}")
+    dir_data = Path(f'results/{nowdate}_{arch}_en_{num_experiments}_iters_{num_iters}_uf_{update_freq}')
     dir_obj = Path(f"{dir_data}/data/obj")
     dir_obj.mkdir(parents=True, exist_ok=True)
     dir_demands = Path(f"{dir_data}/data/demands")
@@ -301,9 +271,6 @@ if __name__ == '__main__':
     obj_hist_data = [get_dataframes(pattern, dir_content, dir_obj) for pattern in patterns]
     dir_content = os.listdir(dir_prices)
     prices_hist_data = [get_dataframes(pattern, dir_content, dir_prices) for pattern in patterns]
-    #demands_patterns = [rf".*{key}.*_average_.*\.csv" for key in market_types]
-    #dir_content = os.listdir(dir_demands)
-    #demands_hist_data = [get_dataframes(pattern, dir_content, dir_demands) for pattern in patterns]
     plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
     file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
 

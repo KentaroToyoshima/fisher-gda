@@ -231,7 +231,7 @@ def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate
         if market_type == 'linear':
             demands_grad = np.copy(valuations)
         elif market_type == 'cd':
-            demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.001)).T).T
+            demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.0001)).T).T
         elif market_type == 'leontief':
             demands_grad = np.zeros_like(demands)
             for buyer in range(budgets.shape[0]):
