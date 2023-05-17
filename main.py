@@ -7,10 +7,10 @@ import os
 import datetime
 import matplotlib.pyplot as plt
 import pandas as pd
-import itertools
 import glob
 from pathlib import Path
 import re
+import json
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
 def get_obj_linear(prices, demands, budgets, valuations):
@@ -175,21 +175,41 @@ def get_dataframes(pattern, dir_content, dir_obj):
     files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
     return [pd.read_csv(file, index_col=0) for file in files]
 
+def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_iters, update_freq, arch, dir_data):
+    params = {
+        "market_types": market_types,
+        "num_experiments": num_experiments,
+        "num_buyers": num_buyers,
+        "num_goods": num_goods,
+        "learning_rate_linear": learning_rate_linear,
+        "learning_rate_cd": learning_rate_cd,
+        "learning_rate_leontief": learning_rate_leontief,
+        "mutation_rate": mutation_rate,
+        "num_iters": num_iters,
+        "update_freq": update_freq,
+        "arch": arch,
+    }
+
+    with open(f'{dir_data}/args.json', 'w') as f:
+        json.dump(params, f, indent=4)
+
 if __name__ == '__main__':
     #TODO:main()にする
     #TODO:コマンドライン引数にする
     #NOTE:このパラメータでcd上手くいきます
+    #TODO:exploitのグラフが下から上へ行くのはなぜ？
+    #おそらく，exploitの定義による．定義は最小値との差なので，t=0が最も小さい時そのようなグラフになる，つまり，exploitが増加している．
     market_types = ['linear', 'cd', 'leontief']
     num_experiments = 3
     num_buyers = 5
     num_goods = 8
     learning_rate_linear = [2, 0.1]  #[price_lr, demand_lr]
     learning_rate_cd = [0.01, 0.01]
-    learning_rate_leontief = [0.01, 0.1]
+    learning_rate_leontief = [0.01, 0.01]
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 3000
     update_freq = 0
-    arch = 'alg2'
+    arch = 'alg4'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
@@ -202,6 +222,8 @@ if __name__ == '__main__':
     dir_prices.mkdir(parents=True, exist_ok=True)
     dir_graphs = Path(f"{dir_data}/graphs")
     dir_graphs.mkdir(parents=True, exist_ok=True)
+
+    write_params_to_file(market_types, num_experiments, num_buyers, num_goods, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_iters, update_freq, arch, dir_data)
 
     #収束先
     '''
