@@ -236,7 +236,9 @@ def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate
             demands_grad = np.zeros_like(demands)
             for buyer in range(budgets.shape[0]):
                 min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+                demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
+                #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
+                #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
         else:
             print('error')
             exit()
