@@ -21,7 +21,7 @@ def get_obj_linear(prices, demands, budgets, valuations):
         utils[buyer] = cu.get_linear_indirect_utill(prices.clip(min= 0.0001), b, v)
         #utils[buyer] = cu.get_linear_utility(demands[buyer,:], v)
     # return np.sum(prices) + budgets.T @ np.log(utils) + np.sum(budgets) - np.sum(demands @ prices )
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.01))
+    return np.sum(prices) + budgets.T @ np.log(utils.clip(min = 0.01))
 
 def get_obj_cd(prices, demands, budgets, valuations):
     utils = np.zeros(budgets.shape[0])
@@ -120,7 +120,7 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, d
         fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 18
         plt.subplots_adjust(wspace=0.4)
-        plt.savefig(f"{dir_graphs}/{arch}_obj_graphs.jpg")
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
         plt.close()
 
 def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch):
@@ -197,9 +197,6 @@ def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, l
 if __name__ == '__main__':
     #TODO:main()にする
     #TODO:コマンドライン引数にする
-    #NOTE:このパラメータでcd上手くいきます
-    #TODO:exploitのグラフが下から上へ行くのはなぜ？
-    #おそらく，exploitの定義による．定義は最小値との差なので，t=0が最も小さい時そのようなグラフになる，つまり，exploitが増加している．
     market_types = ['linear', 'cd', 'leontief']
     num_experiments = 20
     num_buyers = 5
@@ -207,8 +204,8 @@ if __name__ == '__main__':
     learning_rate_linear = [0.1, 0.1]  #[price_lr, demand_lr]
     learning_rate_cd = [0.1, 0.1]
     learning_rate_leontief = [0.1, 0.1]
-    mutation_rate = [0.9, 0.9, 0.9] #[linear, cd, leon]
-    num_iters= 1000
+    mutation_rate = [1, 1, 1] #[linear, cd, leon]
+    num_iters= 10000
     update_freq = 0
     arch = 'm-alg2'
 
