@@ -207,7 +207,7 @@ if __name__ == '__main__':
     mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 1000
     update_freq = 0
-    arch = 'm-alg2'
+    arch = 'alg2'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
