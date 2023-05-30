@@ -234,36 +234,42 @@ def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate
             elif arch == 'alg4':
                 demands_grad = np.copy(valuations)
             elif arch == 'm-alg2':
-                demands_grad = np.copy(valuations) - prices + mutation_rate * (demands_ref - demands)
+                #demands_grad = np.copy(valuations) - prices + mutation_rate * (demands_ref - demands)
+                demands_grad = (budgets/(np.sum(valuations*demands, axis = 1))*valuations.T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (demands_ref - demands)
         elif market_type == 'cd':
             if arch == 'alg2':
                 demands_grad = (budgets*(valuations/demands.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0])
             elif arch == 'alg4':
                 demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.0001)).T).T
             elif arch == 'm-alg2':
-                demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.0001)).T).T - prices + mutation_rate * (demands_ref - demands)
+                #demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.0001)).T).T - prices + mutation_rate * (demands_ref - demands)
+                demands_grad = (budgets*(valuations/demands.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (demands_ref - demands)
         elif market_type == 'leontief':
             if arch == 'alg2':
                 demands_grad = np.zeros_like(demands)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                    #demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
-                    demands_grad[buyer, min_util_good] = budgets[buyer]*demands[buyer, min_util_good] - prices[min_util_good]
+                    #demands_grad[buyer, :] = 1 / valuation
+                    # s[buyer, min_util_good]
+                    demands_grad[buyer, min_util_good] = budgets[buyer]/max(demands[buyer, min_util_good], 0.001) - prices[min_util_good]
+                    #demands_grad[buyer, :] = budgets[buyer]/demands[buyer, min_util_good] - prices[min_util_good]
                     #print(demands_grad[buyer, :])
                     #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
                     #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+
             elif arch == 'alg4':
                 demands_grad = np.zeros_like(demands)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                    demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
+                    #demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
                     #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+                    demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
             elif arch == 'm-alg2':
-                demands_grad = np.zeros_like(demands) - prices
+                demands_grad = np.zeros_like(demands)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                    demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
+                    #demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
+                    demands_grad[buyer, min_util_good] = budgets[buyer]*demands[buyer, min_util_good] - prices[min_util_good]
                     #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
                     #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
                 demands_grad += mutation_rate * (demands_ref - demands)

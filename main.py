@@ -202,10 +202,10 @@ if __name__ == '__main__':
     num_buyers = 5
     num_goods = 8
     learning_rate_linear = [0.01, 0.01]  #[price_lr, demand_lr]
-    learning_rate_cd = [0.1, 0.1]
-    learning_rate_leontief = [0.1, 0.1]
-    mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 1000
+    learning_rate_cd = [0.01, 0.01]
+    learning_rate_leontief = [0.01, 0.01]
+    mutation_rate = [0.1, 1, 1] #[linear, cd, leon]
+    num_iters= 5000
     update_freq = 0
     arch = 'alg2'
 
