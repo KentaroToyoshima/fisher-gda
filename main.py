@@ -198,16 +198,16 @@ if __name__ == '__main__':
     #TODO:main()にする
     #TODO:コマンドライン引数にする
     market_types = ['linear', 'cd', 'leontief']
-    num_experiments = 20
+    num_experiments = 5
     num_buyers = 5
     num_goods = 8
     learning_rate_linear = [0.01, 0.01]  #[price_lr, demand_lr]
     learning_rate_cd = [0.01, 0.01]
     learning_rate_leontief = [0.01, 0.01]
-    mutation_rate = [0.1, 1, 1] #[linear, cd, leon]
+    mutation_rate = [1, 1, 1] #[linear, cd, leon]
     num_iters= 5000
     update_freq = 0
-    arch = 'alg2'
+    arch = 'm-alg2'
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
