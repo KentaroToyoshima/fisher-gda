@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import json
 import argparse
+import time
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
 def get_obj_linear(prices, demands, budgets, valuations):
@@ -267,4 +268,8 @@ def main():
     plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graphs, args.arch, args.num_buyers)
 
 if __name__ == '__main__':
+    start = time.time()
     main()
+    elapsed_time = time.time() - start
+    
+    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
