@@ -11,6 +11,7 @@ import glob
 from pathlib import Path
 import re
 import json
+import argparse
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
 def get_obj_linear(prices, demands, budgets, valuations):
@@ -194,24 +195,26 @@ def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, l
     with open(f'{dir_data}/args.json', 'w') as f:
         json.dump(params, f, indent=4)
 
-if __name__ == '__main__':
-    #TODO:main()にする
-    #TODO:コマンドライン引数にする
+def main():
+    parser = argparse.ArgumentParser()
+    #TODO:market_typeを指定できるようにする
+    #TODO:省略形を指定できるようにする
     market_types = ['linear', 'cd', 'leontief']
-    num_experiments = 5
-    num_buyers = 5
-    num_goods = 8
-    learning_rate_linear = [0.01, 0.01]  #[price_lr, demand_lr]
-    learning_rate_cd = [0.01, 0.01]
-    learning_rate_leontief = [0.01, 0.01]
-    mutation_rate = [1, 1, 1] #[linear, cd, leon]
-    num_iters= 5000
-    update_freq = 0
-    arch = 'm-alg2'
+    parser.add_argument('--num_experiments', type=int, default=5)
+    parser.add_argument('--num_buyers', type=int, default=5)
+    parser.add_argument('--num_goods', type=int, default=8)
+    parser.add_argument('--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
+    parser.add_argument('--num_iters', type=int, default=5000)
+    parser.add_argument('--update_freq', type=int, default=0)
+    parser.add_argument('--arch', type=str, default='m-alg2')
+    args = parser.parse_args()
 
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
-    dir_data = Path(f'results/{nowdate}_{arch}_en_{num_experiments}_iters_{num_iters}_uf_{update_freq}')
+    dir_data = Path(f'results/{nowdate}_{args.arch}_en_{args.num_experiments}_iters_{args.num_iters}_uf_{args.update_freq}')
     dir_obj = Path(f"{dir_data}/data/obj")
     dir_obj.mkdir(parents=True, exist_ok=True)
     dir_demands = Path(f"{dir_data}/data/demands")
@@ -221,36 +224,35 @@ if __name__ == '__main__':
     dir_graphs = Path(f"{dir_data}/graphs")
     dir_graphs.mkdir(parents=True, exist_ok=True)
 
-    write_params_to_file(market_types, num_experiments, num_buyers, num_goods, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_iters, update_freq, arch, dir_data)
-
+    write_params_to_file(market_types, args.num_experiments, args.num_buyers, args.num_goods, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_iters, args.update_freq, args.arch, dir_data)
     #収束先
     demands_linear_ref = np.array([[0.20623613091668674,0.3336534555336145,0.25645391534516004,0.10005288662062428,0.0980636054576395,0.15957711474141045,0.2309186253627186,0.18359554918334048],
-[0.1931747247023043,0.2195250487167748,0.16046510898485222,0.24722257213277707,0.29780321154228784,0.19393492406887672,0.12729652286708698,0.2553246241947231],
-[0.25202845564968596,0.11083088207187246,0.3557522541763148,0.11172855932178827,0.23114459259544257,0.3198853043815345,0.21456643185213134,0.10548584588588202],
-[0.10169290412476979,0.18458568138108583,0.09244625123933141,0.30978417183553836,0.1611064867693787,0.13422534819708098,0.25138380726970017,0.32612324446368196],
-[0.2451079619790657,0.16770222726333758,0.10757142420148716,0.24963582773178378,0.22454022404264057,0.16452348094116284,0.1518205626313237,0.1842317170172249]])
+    [0.1931747247023043,0.2195250487167748,0.16046510898485222,0.24722257213277707,0.29780321154228784,0.19393492406887672,0.12729652286708698,0.2553246241947231],
+    [0.25202845564968596,0.11083088207187246,0.3557522541763148,0.11172855932178827,0.23114459259544257,0.3198853043815345,0.21456643185213134,0.10548584588588202],
+    [0.10169290412476979,0.18458568138108583,0.09244625123933141,0.30978417183553836,0.1611064867693787,0.13422534819708098,0.25138380726970017,0.32612324446368196],
+    [0.2451079619790657,0.16770222726333758,0.10757142420148716,0.24963582773178378,0.22454022404264057,0.16452348094116284,0.1518205626313237,0.1842317170172249]])
     prices_linear_ref = np.array([11.270709297039923,10.814289574822979,10.753916411533188,11.438802312898837,11.358676866398627,11.143766342313254,10.96435957422994,11.044599675122948])
     
     #収束先
     demands_cd_ref = np.array([[0.19846068684605161,0.2041121907143629,0.20262525718257568,0.18312349691429142,0.1844024592114179,0.1873494193689325,0.20804282023694362,0.18224882587283434],
-[0.20479573444839408,0.20144794331693205,0.2223402113709073,0.2174516703271939,0.22466992275431963,0.20465091551153844,0.20084071473350865,0.21826001305096007],
-[0.1913010815311055,0.20441365681774631,0.20017584243442849,0.19130904171186264,0.20987884824120706,0.20828365977518543,0.20479247001381035,0.20301600650048401],
-[0.1983165183472086,0.20269793477684858,0.19452849683206833,0.21733792988747772,0.1851431558260249,0.2173201811158933,0.19901557872314724,0.2111616605231268],
-[0.2071259788272462,0.187328274374117,0.18033019218002716,0.19077786115918116,0.19590561396703773,0.18239582422845774,0.18730841629259698,0.1853134940526016]])
+    [0.20479573444839408,0.20144794331693205,0.2223402113709073,0.2174516703271939,0.22466992275431963,0.20465091551153844,0.20084071473350865,0.21826001305096007],
+    [0.1913010815311055,0.20441365681774631,0.20017584243442849,0.19130904171186264,0.20987884824120706,0.20828365977518543,0.20479247001381035,0.20301600650048401],
+    [0.1983165183472086,0.20269793477684858,0.19452849683206833,0.21733792988747772,0.1851431558260249,0.2173201811158933,0.19901557872314724,0.2111616605231268],
+    [0.2071259788272462,0.187328274374117,0.18033019218002716,0.19077786115918116,0.19590561396703773,0.18239582422845774,0.18730841629259698,0.1853134940526016]])
     prices_cd_ref = np.array([8.937202224509907,9.10385916965439,8.94938452915189,9.27881054935158,9.45135589367398,9.531523736566268,8.716504432102125,9.42891125502871])
 
     #収束先
     demands_leontief_ref = np.array([[0.24121808127568772,0.24835034236601725,0.18681018364131857,0.1479421731841541,0.21432769253756412,0.18104435806645844,0.14267175236238952,0.1770879826287069],
-[0.09913842224810276,0.1563834057166346,0.153837723805674,0.28692497753669943,0.2659672550266936,0.23595130910842924,0.22219380979947861,0.2727379444891606],
-[0.23978549407714417,0.17959466465600807,0.2144583803155681,0.2112383263207295,0.13963709896731555,0.1689546414398923,0.166984852926709,0.28987072019123006],
-[0.22709575219822103,0.19082113465722358,0.19867309359149377,0.18581268518195992,0.15389701366534572,0.25116026316921264,0.2496535833175094,0.17056407915776964],
-[0.20091958961555217,0.17268207429998,0.25735653816104287,0.16715388619004495,0.17572702975094173,0.1644295661873398,0.2523986848045243,0.12512742828319517]])
+    [0.09913842224810276,0.1563834057166346,0.153837723805674,0.28692497753669943,0.2659672550266936,0.23595130910842924,0.22219380979947861,0.2727379444891606],
+    [0.23978549407714417,0.17959466465600807,0.2144583803155681,0.2112383263207295,0.13963709896731555,0.1689546414398923,0.166984852926709,0.28987072019123006],
+    [0.22709575219822103,0.19082113465722358,0.19867309359149377,0.18581268518195992,0.15389701366534572,0.25116026316921264,0.2496535833175094,0.17056407915776964],
+    [0.20091958961555217,0.17268207429998,0.25735653816104287,0.16715388619004495,0.17572702975094173,0.1644295661873398,0.2523986848045243,0.12512742828319517]])
     prices_leontief_ref = np.array([9.153076425449168,9.364909065859923,9.27838920430462,9.245566865329362,9.046316932360622,8.9900646175248,9.193457326837096,9.122314474779257])
     #prices_leontief_ref = np.array([11,11,11,11,11,11,11,11])
     #prices_leontief_ref = np.array([1.76612110e+01, 7.58249600e+00, 4.02669818e+00, 1.44980598e+01, 1.10000000e-05, 1.32743758e+01, 1.61819512e+01, 7.61927460e+00])
 
     # results
-    (results_linear, results_cd, results_leontief) = run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_types, dir_obj, dir_demands, dir_prices)
+    (results_linear, results_cd, results_leontief) = run_test(args.num_buyers, args.num_goods, demands_linear_ref, demands_cd_ref, demands_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_experiments, args.num_iters, args.update_freq, args.arch, market_types, dir_obj, dir_demands, dir_prices)
 
     patterns = [rf'.*{key}.*\.csv' for key in market_types]
     dir_content = os.listdir(dir_obj)
@@ -260,6 +262,9 @@ if __name__ == '__main__':
     plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
     file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
 
-    plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch)
-    plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch)
-    plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graphs, arch, num_buyers)
+    plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, args.arch)
+    plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, args.arch)
+    plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graphs, args.arch, args.num_buyers)
+
+if __name__ == '__main__':
+    main()
