@@ -207,9 +207,9 @@ def main():
     parser.add_argument('--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
     parser.add_argument('--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
     parser.add_argument('--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
-    parser.add_argument('--num_iters', type=int, default=5000)
+    parser.add_argument('--num_iters', type=int, default=1000)
     parser.add_argument('--update_freq', type=int, default=0)
-    parser.add_argument('--arch', type=str, default='m-alg2')
+    parser.add_argument('--arch', type=str, default='alg4')
     args = parser.parse_args()
 
     now = datetime.datetime.now()
