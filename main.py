@@ -58,7 +58,7 @@ def run_test(num_buyers, num_goods, demands_linear_ref, demands_cd_ref, demands_
         valuations = np.random.rand(num_buyers, num_goods) * 10 + 5
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
-        demands_0 = np.random.rand(num_buyers, num_goods)
+        demands_0 = np.random.rand(num_buyers, num_goods) + 0.1
         prices_0 = np.random.rand(num_goods)
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
@@ -168,7 +168,7 @@ def plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graph
             fig.set_size_inches(25.5, 5.5)
             plt.title(plot_title+' buyer '+str(buyer), fontsize="medium")
             plt.xlabel('Iteration Number')
-            plt.ylabel('Demand')
+            plt.ylabel('Allocations')
             plt.rcParams["font.size"] = 18
             plt.subplots_adjust(wspace=0.4)
             plt.savefig(f"{dir_graphs}/{arch}_demands_graphs_{market_type}_buyer_{buyer}.jpg")
