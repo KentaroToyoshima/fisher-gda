@@ -228,6 +228,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
         prices_hist.append(np.copy(prices))
 
         # allocations Step
+        allocations_grad = np.zeros_like(allocations)
         if market_type == 'linear':
             if arch == 'alg2':
                 allocations_grad = (budgets/(np.sum(valuations*allocations, axis = 1))*valuations.T).T - np.array([prices, ]*budgets.shape[0])
@@ -248,7 +249,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                 allocations_grad = (budgets*(valuations/allocations.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (allocations_ref - allocations)
         elif market_type == 'leontief':
             if arch == 'alg2':
-                allocations_grad = np.zeros_like(allocations)
+                #allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
                     #allocations_grad[buyer, :] = 1 / valuation
@@ -259,7 +260,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                     #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
             elif arch == 'alg4':
-                allocations_grad = np.zeros_like(allocations)
+                #allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
                     #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
@@ -267,7 +268,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                     #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
                     allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001)
             elif arch == 'm-alg2':
-                allocations_grad = np.zeros_like(allocations)
+                #allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
                     #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
