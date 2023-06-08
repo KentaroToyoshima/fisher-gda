@@ -276,9 +276,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                     #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
                 allocations_grad += mutation_rate * (allocations_ref - allocations)
-        else:
-            print('error')
-            exit()
+        else: exit("unknown market type")
 
         # if decay_inner:
         #     allocations_grad *= iter ** (-1 / 2)

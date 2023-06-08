@@ -204,21 +204,21 @@ def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, l
 
 def main():
     parser = argparse.ArgumentParser()
-    #TODO:market_typeを指定できるようにする
     #TODO:省略形を指定できるようにする
     #market_types = ['linear', 'cd', 'leontief']
     #parser.add_argument('--market_types', nargs='+', type=str, default=['linear', 'cd', 'leontief'])
-    parser.add_argument('--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
-    parser.add_argument('--num_experiments', type=int, default=5)
-    parser.add_argument('--num_buyers', type=int, default=5)
-    parser.add_argument('--num_goods', type=int, default=8)
-    parser.add_argument('--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
-    parser.add_argument('--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
-    parser.add_argument('--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
-    parser.add_argument('--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
-    parser.add_argument('--num_iters', type=int, default=1000)
-    parser.add_argument('--update_freq', type=int, default=0)
-    parser.add_argument('--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
+    parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
+    parser.add_argument('-e', '--num_experiments', type=int, default=5)
+    parser.add_argument('-b', '--num_buyers', type=int, default=5)
+    parser.add_argument('-g', '--num_goods', type=int, default=8)
+    parser.add_argument('-li', '--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('-cd', '--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('-Le', '--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('-mu', '--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
+    parser.add_argument('-i', '--num_iters', type=int, default=1000)
+    parser.add_argument('-u', '--update_freq', type=int, default=0)
+    parser.add_argument('-a', '--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
+
     args = parser.parse_args()
 
     now = datetime.datetime.now()
