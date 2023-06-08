@@ -122,7 +122,7 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, d
         fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 18
         plt.subplots_adjust(wspace=0.4)
-        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.close()
 
 def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch):
@@ -139,7 +139,7 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_
     fig.set_size_inches(25.5, 5.5)
     plt.rcParams["font.size"] = 18
     plt.subplots_adjust(wspace=0.4)
-    plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
+    #plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
 
@@ -171,7 +171,7 @@ def plot_and_save_demand_graphs(plot_titles, file_prefix, dir_demands, dir_graph
             plt.ylabel('Allocations')
             plt.rcParams["font.size"] = 18
             plt.subplots_adjust(wspace=0.4)
-            plt.savefig(f"{dir_graphs}/{arch}_demands_graphs_{market_type}_buyer_{buyer}.jpg")
+            plt.savefig(f"{dir_graphs}/{arch}_demands_graphs_{market_type}_buyer_{buyer}.pdf")
             plt.close()
 
 def get_dataframes(pattern, dir_content, dir_obj):
