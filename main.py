@@ -63,22 +63,24 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
-        print(f"*******************************")
-        print(f"------------ GDA ------------")
 
         # Linear Fisher Market
-        print(f"------ Linear Fisher Market ------")
-        results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, market_types[0], num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
+        if 'linear' in market_types:
+            print(f"------ Linear Fisher Market ------")
+            #TODO:market_typeはハードに指定しないとダメか？他の方法が無いか考える
+            results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
 
         # Cobb-Douglas Fisher Market
-        print(f"------ Cobb-Douglas Fisher Market ------")
-        #prices_0 = np.random.rand(num_goods)
-        results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, market_types[1], num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
+        if 'cd' in market_types:
+            print(f"------ Cobb-Douglas Fisher Market ------")
+            #prices_0 = np.random.rand(num_goods)
+            results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
 
         # Leontief Fisher Market
-        print(f"------ Leontief Fisher Market ------")
-        #prices_0 = np.random.rand(num_goods)
-        results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, market_types[2], num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
+        if 'leontief' in market_types:
+            print(f"------ Leontief Fisher Market ------")
+            #prices_0 = np.random.rand(num_goods)
+            results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
 
         # Save data
         for key in results:
@@ -90,66 +92,70 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
 
             # Save prices
             df_prices = pd.DataFrame(prices_hist_all)
-            df_prices.to_csv(f"{dir_prices}/{arch}_prices_hist_gda_{key}_{experiment_num}.csv")
+            df_prices.to_csv(f"{dir_prices}/{arch}_prices_hist_{key}_{experiment_num}.csv")
 
             # Save allocations
             for buyer in range(num_buyers):
                 df_allocations = pd.DataFrame(allocations_hist_all[buyer])
-                df_allocations.to_csv(f"{dir_allocations}/{arch}_allocations_hist_gda_{key}_{experiment_num}_buyer_{buyer}.csv")
+                df_allocations.to_csv(f"{dir_allocations}/{arch}_allocations_hist_{key}_{experiment_num}_buyer_{buyer}.csv")
 
             # Save objective function
             df_obj = pd.DataFrame(obj_hist_all)
-            df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_gda_{key}_{experiment_num}.csv")
+            df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_{key}_{experiment_num}.csv")
 
-    return (
-        results["linear"],
-        results["cd"],
-        results["leontief"],
-    )
+    return (results)
 
-def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, arch):
+def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
         print("plotting exploitability graphs...")
-        fig, axs = plt.subplots(1, 3)
-    
-        for i, (obj_hist, title, market) in enumerate(zip(obj_hist_data, plot_titles, file_prefix)):
+        #fig, axs = plt.subplots(1, len(market_types), figsize=(25.5, 5.5))
+        width_per_subplot = 8
+        fig, axs = plt.subplots(1, len(market_types), figsize=(width_per_subplot * len(market_types), 5.5))
+
+        if len(market_types) == 1:
+            axs = [axs]
+
+        for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
             mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
             axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability')
             #axs[i].set_ylim(-0.05, 3)
-            pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market}.csv")
+            pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
 
-        fig.set_size_inches(25.5, 5.5)
+        #fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 18
         plt.subplots_adjust(wspace=0.4)
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.close()
 
-def plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, arch):
+def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir_prices, dir_graphs, arch):
     print("plotting prices graphs...")
-    fig, axs = plt.subplots(1, 3)
+    #fig, axs = plt.subplots(1, len(market_types))
+    width_per_subplot = 8
+    fig, axs = plt.subplots(1, len(market_types), figsize=(width_per_subplot * len(market_types), 5.5))
+
+    if len(market_types) == 1:
+        axs = [axs]
     
-    for i, (prices_hist, title, market) in enumerate(zip(prices_hist_data, plot_titles, file_prefix)):
+    for i, (prices_hist, title, market_type) in enumerate(zip(prices_hist_data, plot_titles, market_types)):
         mean_prices = np.mean(prices_hist, axis=0)
         axs[i].plot(mean_prices)
         axs[i].set_title(title, fontsize="medium")
         axs[i].set(xlabel='Iteration Number', ylabel=r'prices')
-        pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market}_average.csv")
+        pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market_type}_average.csv")
 
-    fig.set_size_inches(25.5, 5.5)
+    #fig.set_size_inches(25.5, 5.5)
     plt.rcParams["font.size"] = 18
     plt.subplots_adjust(wspace=0.4)
     #plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
 
-def plot_and_save_allocations_graphs(plot_titles, file_prefix, dir_allocations, dir_graphs, arch, num_buyers):
+def plot_and_save_allocations_graphs(plot_titles, market_types, dir_allocations, dir_graphs, arch, num_buyers):
     print("plotting allocations graphs...")
     fig, axs = plt.subplots()
-    plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
-    file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
 
-    for market_type, plot_title in zip(file_prefix, plot_titles):
+    for market_type, plot_title in zip(market_types, plot_titles):
         for buyer in range(num_buyers):
             file_pattern = f"{dir_allocations}/{arch}_allocations_hist_{market_type}_*_buyer_{buyer}.csv"
             file_list = glob.glob(file_pattern)
@@ -200,7 +206,9 @@ def main():
     parser = argparse.ArgumentParser()
     #TODO:market_typeを指定できるようにする
     #TODO:省略形を指定できるようにする
-    market_types = ['linear', 'cd', 'leontief']
+    #market_types = ['linear', 'cd', 'leontief']
+    #parser.add_argument('--market_types', nargs='+', type=str, default=['linear', 'cd', 'leontief'])
+    parser.add_argument('--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
     parser.add_argument('--num_experiments', type=int, default=5)
     parser.add_argument('--num_buyers', type=int, default=5)
     parser.add_argument('--num_goods', type=int, default=8)
@@ -210,7 +218,7 @@ def main():
     parser.add_argument('--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
     parser.add_argument('--num_iters', type=int, default=1000)
     parser.add_argument('--update_freq', type=int, default=0)
-    parser.add_argument('--arch', type=str, default='alg4')
+    parser.add_argument('--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
     args = parser.parse_args()
 
     now = datetime.datetime.now()
@@ -225,7 +233,7 @@ def main():
     dir_graphs = Path(f"{dir_data}/graphs")
     dir_graphs.mkdir(parents=True, exist_ok=True)
 
-    write_params_to_file(market_types, args.num_experiments, args.num_buyers, args.num_goods, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_iters, args.update_freq, args.arch, dir_data)
+    write_params_to_file(args.market_types, args.num_experiments, args.num_buyers, args.num_goods, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_iters, args.update_freq, args.arch, dir_data)
     #収束先
     allocations_linear_ref = np.array([[0.20623613091668674,0.3336534555336145,0.25645391534516004,0.10005288662062428,0.0980636054576395,0.15957711474141045,0.2309186253627186,0.18359554918334048],
     [0.1931747247023043,0.2195250487167748,0.16046510898485222,0.24722257213277707,0.29780321154228784,0.19393492406887672,0.12729652286708698,0.2553246241947231],
@@ -253,19 +261,23 @@ def main():
     #prices_leontief_ref = np.array([1.76612110e+01, 7.58249600e+00, 4.02669818e+00, 1.44980598e+01, 1.10000000e-05, 1.32743758e+01, 1.61819512e+01, 7.61927460e+00])
 
     # results
-    (results_linear, results_cd, results_leontief) = run_test(args.num_buyers, args.num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_experiments, args.num_iters, args.update_freq, args.arch, market_types, dir_obj, dir_allocations, dir_prices)
+    results = run_test(args.num_buyers, args.num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_experiments, args.num_iters, args.update_freq, args.arch, args.market_types, dir_obj, dir_allocations, dir_prices)
 
-    patterns = [rf'.*{key}.*\.csv' for key in market_types]
+    patterns = [rf'.*{key}.*\.csv' for key in args.market_types]
     dir_content = os.listdir(dir_obj)
     obj_hist_data = [get_dataframes(pattern, dir_content, dir_obj) for pattern in patterns]
     dir_content = os.listdir(dir_prices)
     prices_hist_data = [get_dataframes(pattern, dir_content, dir_prices) for pattern in patterns]
-    plot_titles = ["Linear Market", "Cobb-Douglas Market", "Leontief Market"]
-    file_prefix = ["gda_linear", "gda_cd", "gda_leontief"]
+    plot_titles_dict = {
+        'linear': "Linear Market",
+        'cd': "Cobb-Douglas Market",
+        'leontief': "Leontief Market"
+    }
+    plot_titles = [plot_titles_dict[market] for market in args.market_types]
 
-    plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, dir_graphs, args.arch)
-    plot_and_save_prices_graphs(prices_hist_data, plot_titles, file_prefix, dir_prices, dir_graphs, args.arch)
-    plot_and_save_allocations_graphs(plot_titles, file_prefix, dir_allocations, dir_graphs, args.arch, args.num_buyers)
+    plot_and_save_obj_graphs(obj_hist_data, plot_titles, args.market_types, dir_obj, dir_graphs, args.arch)
+    plot_and_save_prices_graphs(prices_hist_data, plot_titles, args.market_types, dir_prices, dir_graphs, args.arch)
+    plot_and_save_allocations_graphs(plot_titles, args.market_types, dir_allocations, dir_graphs, args.arch, args.num_buyers)
 
 if __name__ == '__main__':
     start = time.time()
