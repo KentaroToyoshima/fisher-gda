@@ -200,23 +200,23 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
     return (demands, prices, demands_hist, prices_hist)
 
 #TODO:algによって初期値を変える必要がある？
-def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate, mutation_rate, demands_ref, prices_ref, num_iters, update_num, arch, market_type, decay_outer=False, decay_inner=False):
-    demands = np.copy(demands_0)
+def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_num, arch, market_type, decay_outer=False, decay_inner=False):
+    allocations = np.copy(allocations_0)
     prices = np.copy(prices_0)
     prices_hist = []
-    demands_hist = []
+    allocations_hist = []
     prices_hist.append(np.copy(prices))
-    demands_hist.append(np.copy(demands))
+    allocations_hist.append(np.copy(allocations))
 
     for iter in range(1, num_iters):
         if not iter % 1000:
             print(f" ----- Iteration {iter}/{num_iters} ----- ")
 
         # Price Step
-        demand = np.sum(demands, axis=0)
-        excess_demand = demand - 1
+        allocation = np.sum(allocations, axis=0)
+        excess_allocation = allocation - 1
 
-        step_size = excess_demand
+        step_size = excess_allocation
         if decay_outer:
             step_size *= iter ** (-1 / 2)
         if arch == 'm-alg2':
@@ -227,73 +227,73 @@ def calc_gda(num_buyers, valuations, budgets, demands_0, prices_0, learning_rate
         prices = prices.clip(min=0.0001)
         prices_hist.append(np.copy(prices))
 
-        # Demand Step
+        # allocations Step
         if market_type == 'linear':
             if arch == 'alg2':
-                demands_grad = (budgets/(np.sum(valuations*demands, axis = 1))*valuations.T).T - np.array([prices, ]*budgets.shape[0])
+                allocations_grad = (budgets/(np.sum(valuations*allocations, axis = 1))*valuations.T).T - np.array([prices, ]*budgets.shape[0])
             elif arch == 'alg4':
-                #demands_grad = np.copy(valuations)
-                demands_grad = (budgets/(np.sum(valuations*demands, axis = 1))*valuations.T).T
+                #allocations_grad = np.copy(valuations)
+                allocations_grad = (budgets/(np.sum(valuations*allocations, axis = 1))*valuations.T).T
             elif arch == 'm-alg2':
-                #demands_grad = np.copy(valuations) - prices + mutation_rate * (demands_ref - demands)
-                demands_grad = (budgets/(np.sum(valuations*demands, axis = 1))*valuations.T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (demands_ref - demands)
+                #allocations_grad = np.copy(valuations) - prices + mutation_rate * (allocations_ref - allocations)
+                allocations_grad = (budgets/(np.sum(valuations*allocations, axis = 1))*valuations.T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (allocations_ref - allocations)
         elif market_type == 'cd':
             if arch == 'alg2':
-                demands_grad = (budgets*(valuations/demands.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0])
+                allocations_grad = (budgets*(valuations/allocations.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0])
             elif arch == 'alg4':
-                #demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.0001)).T).T
-                demands_grad = (budgets*(valuations/demands.clip(min=0.001)).T).T
+                #allocations_grad = (np.prod(np.power(allocations, valuations), axis=1) * (valuations / allocations.clip(min=0.0001)).T).T
+                allocations_grad = (budgets*(valuations/allocations.clip(min=0.001)).T).T
             elif arch == 'm-alg2':
-                #demands_grad = (np.prod(np.power(demands, valuations), axis=1) * (valuations / demands.clip(min=0.0001)).T).T - prices + mutation_rate * (demands_ref - demands)
-                demands_grad = (budgets*(valuations/demands.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (demands_ref - demands)
+                #allocations_grad = (np.prod(np.power(allocations, valuations), axis=1) * (valuations / allocations.clip(min=0.0001)).T).T - prices + mutation_rate * (allocations_ref - allocations)
+                allocations_grad = (budgets*(valuations/allocations.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (allocations_ref - allocations)
         elif market_type == 'leontief':
             if arch == 'alg2':
-                demands_grad = np.zeros_like(demands)
+                allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
-                    min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                    #demands_grad[buyer, :] = 1 / valuation
+                    min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
+                    #allocations_grad[buyer, :] = 1 / valuation
                     # s[buyer, min_util_good]
-                    demands_grad[buyer, min_util_good] = budgets[buyer]/max(demands[buyer, min_util_good], 0.001) - prices[min_util_good]
-                    #demands_grad[buyer, :] = budgets[buyer]/demands[buyer, min_util_good] - prices[min_util_good]
-                    #print(demands_grad[buyer, :])
-                    #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+                    allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
+                    #allocations_grad[buyer, :] = budgets[buyer]/allocations[buyer, min_util_good] - prices[min_util_good]
+                    #print(allocations_grad[buyer, :])
+                    #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
+                    #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
             elif arch == 'alg4':
-                demands_grad = np.zeros_like(demands)
+                allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
-                    min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                    #demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
-                    #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    demands_grad[buyer, min_util_good] = budgets[buyer]/max(demands[buyer, min_util_good], 0.001)
+                    min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
+                    #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
+                    #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
+                    #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+                    allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001)
             elif arch == 'm-alg2':
-                demands_grad = np.zeros_like(demands)
+                allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
-                    min_util_good = np.argmin(demands[buyer, :] / valuations[buyer, :])
-                    #demands_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
-                    demands_grad[buyer, min_util_good] = budgets[buyer]/max(demands[buyer, min_util_good], 0.001) - prices[min_util_good]
-                    #demands_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #demands_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
-                demands_grad += mutation_rate * (demands_ref - demands)
+                    min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
+                    #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
+                    allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
+                    #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
+                    #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
+                allocations_grad += mutation_rate * (allocations_ref - allocations)
         else:
             print('error')
             exit()
 
         # if decay_inner:
-        #     demands_grad *= iter ** (-1 / 2)
+        #     allocations_grad *= iter ** (-1 / 2)
         # if arch == 'm-alg2':
-        #     demands_grad += mutation_rate * (demands_ref - demands)
+        #     allocations_grad += mutation_rate * (allocations_ref - allocations)
         # if arch != 'alg4':
-        #     demands_grad -= prices
+        #     allocations_grad -= prices
 
-        demands += learning_rate[1] * demands_grad
+        allocations += learning_rate[1] * allocations_grad
         if arch == 'm-alg2' and update_num != 0 and iter % update_num == 0:
-            demands_ref = np.copy(demands)
+            allocations_ref = np.copy(allocations)
 
         # Projection step
         if arch == 'alg4':
-            demands = project_to_bugdet_set(demands, prices, budgets)
-        demands = demands.clip(min=0)
-        demands_hist.append(np.copy(demands))
+            allocations = project_to_bugdet_set(allocations, prices, budgets)
+        allocations = allocations.clip(min=0)
+        allocations_hist.append(np.copy(allocations))
 
-    return (demands, prices, demands_hist, prices_hist)
+    return (allocations, prices, allocations_hist, prices_hist)
