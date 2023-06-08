@@ -112,6 +112,7 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, file_prefix, dir_obj, d
         fig, axs = plt.subplots(1, 3)
     
         for i, (obj_hist, title, market) in enumerate(zip(obj_hist_data, plot_titles, file_prefix)):
+            #TODO:Exploitabilityの式を修正する
             mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
