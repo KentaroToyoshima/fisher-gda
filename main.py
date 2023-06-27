@@ -62,7 +62,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         prices_0 = np.random.rand(num_goods)
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
-        print(f"****** Market Parameters ******\nval = {valuations}\n budgets = {budgets}\n")
+        print(f"val = {valuations}\n budgets = {budgets}\n")
 
         # Linear Fisher Market
         if 'linear' in market_types:
@@ -103,7 +103,6 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             df_obj = pd.DataFrame(obj_hist_all)
             df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_{key}_{experiment_num}.csv")
 
-    return (results)
 
 def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
         print("plotting exploitability graphs...")
@@ -202,25 +201,7 @@ def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, l
     with open(f'{dir_data}/args.json', 'w') as f:
         json.dump(params, f, indent=4)
 
-def main():
-    parser = argparse.ArgumentParser()
-    #TODO:省略形を指定できるようにする
-    #market_types = ['linear', 'cd', 'leontief']
-    #parser.add_argument('--market_types', nargs='+', type=str, default=['linear', 'cd', 'leontief'])
-    parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
-    parser.add_argument('-e', '--num_experiments', type=int, default=5)
-    parser.add_argument('-b', '--num_buyers', type=int, default=5)
-    parser.add_argument('-g', '--num_goods', type=int, default=8)
-    parser.add_argument('-li', '--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
-    parser.add_argument('-cd', '--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
-    parser.add_argument('-Le', '--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
-    parser.add_argument('-mu', '--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
-    parser.add_argument('-i', '--num_iters', type=int, default=1000)
-    parser.add_argument('-u', '--update_freq', type=int, default=0)
-    parser.add_argument('-a', '--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
-
-    args = parser.parse_args()
-
+def main(args):
     now = datetime.datetime.now()
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
     dir_data = Path(f'results/{nowdate}_{args.arch}_en_{args.num_experiments}_iters_{args.num_iters}_uf_{args.update_freq}')
@@ -261,7 +242,7 @@ def main():
     #prices_leontief_ref = np.array([1.76612110e+01, 7.58249600e+00, 4.02669818e+00, 1.44980598e+01, 1.10000000e-05, 1.32743758e+01, 1.61819512e+01, 7.61927460e+00])
 
     # results
-    results = run_test(args.num_buyers, args.num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_experiments, args.num_iters, args.update_freq, args.arch, args.market_types, dir_obj, dir_allocations, dir_prices)
+    run_test(args.num_buyers, args.num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_experiments, args.num_iters, args.update_freq, args.arch, args.market_types, dir_obj, dir_allocations, dir_prices)
 
     patterns = [rf'.*{key}.*\.csv' for key in args.market_types]
     dir_content = os.listdir(dir_obj)
@@ -280,8 +261,22 @@ def main():
     plot_and_save_allocations_graphs(plot_titles, args.market_types, dir_allocations, dir_graphs, args.arch, args.num_buyers)
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
+    parser.add_argument('-e', '--num_experiments', type=int, default=5)
+    parser.add_argument('-b', '--num_buyers', type=int, default=5)
+    parser.add_argument('-g', '--num_goods', type=int, default=8)
+    parser.add_argument('-li', '--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('-cd', '--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('-Le', '--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
+    parser.add_argument('-mu', '--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
+    parser.add_argument('-i', '--num_iters', type=int, default=1000)
+    parser.add_argument('-u', '--update_freq', type=int, default=0)
+    parser.add_argument('-a', '--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
+    args = parser.parse_args()
+
     start = time.time()
-    main()
+    main(args)
     elapsed_time = time.time() - start
     
     print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
