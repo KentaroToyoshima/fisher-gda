@@ -125,6 +125,7 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, 
         plt.rcParams["font.size"] = 18
         plt.subplots_adjust(wspace=0.4)
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
         plt.close()
 
 def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir_prices, dir_graphs, arch):
@@ -141,12 +142,13 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir
         axs[i].plot(mean_prices)
         axs[i].set_title(title, fontsize="medium")
         axs[i].set(xlabel='Iteration Number', ylabel=r'prices')
+        axs[i].legend(prices_hist[0].columns)
         pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market_type}_average.csv")
 
     #fig.set_size_inches(25.5, 5.5)
     plt.rcParams["font.size"] = 18
     plt.subplots_adjust(wspace=0.4)
-    #plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
+    plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
 
@@ -177,6 +179,7 @@ def plot_and_save_allocations_graphs(plot_titles, market_types, dir_allocations,
             plt.rcParams["font.size"] = 18
             plt.subplots_adjust(wspace=0.4)
             plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_buyer_{buyer}.pdf")
+            plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_buyer_{buyer}.jpg")
             plt.close()
 
 def get_dataframes(pattern, dir_content, dir_obj):
