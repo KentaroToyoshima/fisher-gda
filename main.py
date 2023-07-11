@@ -206,6 +206,7 @@ def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, l
 
 def main(args):
     now = datetime.datetime.now()
+    time.sleep(1)
     nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
     dir_data = Path(f'results/{nowdate}_{args.arch}_en_{args.num_experiments}_iters_{args.num_iters}_uf_{args.update_freq}')
     dir_obj = Path(f"{dir_data}/data/obj")
