@@ -253,6 +253,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
                     allocations_grad[buyer, :] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
+                    #allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
                     #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[buyer, :] = budgets[buyer]/allocations[buyer, min_util_good] - prices[min_util_good]
                     #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
@@ -262,6 +263,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
                     allocations_grad[buyer, :] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001)
+                    #allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001)
                     #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
@@ -270,6 +272,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
                     allocations_grad[buyer, :] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
+                    #allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
                     #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
                     #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
