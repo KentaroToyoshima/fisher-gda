@@ -199,7 +199,6 @@ def gda_leontief(num_buyers, valuations, budgets, demands_0, prices_0, learning_
 
     return (demands, prices, demands_hist, prices_hist)
 
-#TODO:algによって初期値を変える必要がある？
 def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_num, arch, market_type, decay_outer=False, decay_inner=False):
     allocations = np.copy(allocations_0)
     prices = np.copy(prices_0)
