@@ -115,14 +115,22 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, 
 
         for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
             mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
+            #Goktasによると、下の式はt^{-1/2}で割るということらしい
+            mean_obj = mean_obj.flatten()
+            indices = np.arange(1, len(mean_obj)+1, 1)
+            indices = indices ** (1/2)
+            mean_obj = mean_obj * indices
+            ### ここまで
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
-            axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability')
+            axs[i].set_xlabel('Iteration Number', fontsize=21) # 22を任意のフォントサイズに変更
+            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21) # 22を任意のフォントサイズに変更
+            #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
             #axs[i].set_ylim(-0.05, 3)
             pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
 
         #fig.set_size_inches(25.5, 5.5)
-        plt.rcParams["font.size"] = 18
+        plt.rcParams["font.size"] = 22
         plt.subplots_adjust(wspace=0.4)
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
