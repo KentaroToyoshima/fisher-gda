@@ -74,6 +74,8 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             #TODO:market_typeはハードに指定しないとダメか？他の方法が無いか考える
             results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
             objective_value["linear"].append(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
+            print(objective_value["linear"][-1])
+            print(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
 
         # Cobb-Douglas Fisher Market
         if 'cd' in market_types:
@@ -81,15 +83,17 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             #prices_0 = np.random.rand(num_goods)
             results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
             objective_value["cd"].append(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').fun)
+            print(objective_value["cd"][-1])
+            print(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').x)
 
         # Leontief Fisher Market
         if 'leontief' in market_types:
             print(f"------ Leontief Fisher Market ------")
             #prices_0 = np.random.rand(num_goods)
             results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
-            objective_value["leontief"].append(minimize(get_obj_leontief, prices_0, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
+            objective_value["leontief"].append(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
+            print(objective_value["leontief"][-1])
             print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
-            print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
 
         # Save data
         for key in results:
