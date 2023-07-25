@@ -74,8 +74,8 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             #TODO:market_typeはハードに指定しないとダメか？他の方法が無いか考える
             results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
             objective_value["linear"].append(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
-            print(objective_value["linear"][-1])
-            print(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
+            #print(objective_value["linear"][-1])
+            #print(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
 
         # Cobb-Douglas Fisher Market
         if 'cd' in market_types:
@@ -83,8 +83,8 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             #prices_0 = np.random.rand(num_goods)
             results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
             objective_value["cd"].append(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').fun)
-            print(objective_value["cd"][-1])
-            print(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').x)
+            #print(objective_value["cd"][-1])
+            #print(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').x)
 
         # Leontief Fisher Market
         if 'leontief' in market_types:
@@ -92,8 +92,8 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             #prices_0 = np.random.rand(num_goods)
             results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
             objective_value["leontief"].append(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
-            print(objective_value["leontief"][-1])
-            print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
+            #print(objective_value["leontief"][-1])
+            #print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
 
         # Save data
         for key in results:
@@ -126,11 +126,11 @@ def plot_and_save_obj_graphs_followed_paper_time_average(obj_hist_data, plot_tit
             axs = [axs]
 
         for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
-            mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
+            mean_obj = np.mean(obj_hist, axis=0) - sum(objective_value[market_type]) / len(objective_value[market_type])
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
-            axs[i].set_xlabel('Iteration Number', fontsize=21) # 22を任意のフォントサイズに変更
-            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21) # 22を任意のフォントサイズに変更
+            axs[i].set_xlabel('Iteration Number', fontsize=21)
+            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21)
             #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
             #axs[i].set_ylim(-0.05, 3)
             pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
@@ -138,6 +138,7 @@ def plot_and_save_obj_graphs_followed_paper_time_average(obj_hist_data, plot_tit
         #fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 22
         plt.subplots_adjust(wspace=0.4)
+        plt.grid(linestyle='dotted')
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
         plt.close()
@@ -164,6 +165,7 @@ def plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, market_t
         #fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 22
         plt.subplots_adjust(wspace=0.4)
+        plt.grid(linestyle='dotted')
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
         plt.close()
@@ -190,6 +192,7 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, 
         #fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 22
         plt.subplots_adjust(wspace=0.4)
+        plt.grid(linestyle='dotted')
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
         plt.close()
@@ -214,6 +217,7 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir
     #fig.set_size_inches(25.5, 5.5)
     plt.rcParams["font.size"] = 18
     plt.subplots_adjust(wspace=0.4)
+    plt.grid(linestyle='dotted')
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
@@ -244,6 +248,7 @@ def plot_and_save_allocations_graphs(plot_titles, market_types, dir_allocations,
             plt.ylabel('Allocations')
             plt.rcParams["font.size"] = 18
             plt.subplots_adjust(wspace=0.4)
+            plt.grid(linestyle='dotted')
             plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_buyer_{buyer}.pdf")
             plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_buyer_{buyer}.jpg")
             plt.close()
