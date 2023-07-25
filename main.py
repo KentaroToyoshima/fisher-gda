@@ -13,6 +13,7 @@ import re
 import json
 import argparse
 import time
+from scipy.optimize import minimize
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
 def get_obj_linear(prices, allocations, budgets, valuations):
@@ -51,6 +52,8 @@ def run_experiment(fm_func, get_obj, market_type, num_buyers, valuations, budget
 
 def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_types, dir_obj, dir_allocations, dir_prices):
     results = {key: [] for key in market_types}
+    global objective_value
+    objective_value = {key: [] for key in market_types}
 
     for experiment_num in range(num_experiments):
         np.random.seed(experiment_num)
@@ -60,6 +63,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         budgets = np.random.rand(num_buyers) * 10 + 10
         allocations_0 = np.random.rand(num_buyers, num_goods) + 0.1
         prices_0 = np.random.rand(num_goods)
+        bounds = [(0, None) for _ in prices_0]
 
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"val = {valuations}\n budgets = {budgets}\n")
@@ -69,18 +73,23 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             print(f"------ Linear Fisher Market ------")
             #TODO:market_typeはハードに指定しないとダメか？他の方法が無いか考える
             results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
+            objective_value["linear"].append(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
 
         # Cobb-Douglas Fisher Market
         if 'cd' in market_types:
             print(f"------ Cobb-Douglas Fisher Market ------")
             #prices_0 = np.random.rand(num_goods)
             results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
+            objective_value["cd"].append(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').fun)
 
         # Leontief Fisher Market
         if 'leontief' in market_types:
             print(f"------ Leontief Fisher Market ------")
             #prices_0 = np.random.rand(num_goods)
             results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
+            objective_value["leontief"].append(minimize(get_obj_leontief, prices_0, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
+            print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
+            print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
 
         # Save data
         for key in results:
@@ -103,6 +112,57 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             df_obj = pd.DataFrame(obj_hist_all)
             df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_{key}_{experiment_num}.csv")
 
+def plot_and_save_obj_graphs_followed_paper_time_average(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
+        print("plotting exploitability graphs...")
+        #fig, axs = plt.subplots(1, len(market_types), figsize=(25.5, 5.5))
+        width_per_subplot = 8
+        fig, axs = plt.subplots(1, len(market_types), figsize=(width_per_subplot * len(market_types), 5.5))
+
+        if len(market_types) == 1:
+            axs = [axs]
+
+        for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
+            mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
+            axs[i].plot(mean_obj, color="b")
+            axs[i].set_title(title, fontsize="medium")
+            axs[i].set_xlabel('Iteration Number', fontsize=21) # 22を任意のフォントサイズに変更
+            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21) # 22を任意のフォントサイズに変更
+            #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
+            #axs[i].set_ylim(-0.05, 3)
+            pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
+
+        #fig.set_size_inches(25.5, 5.5)
+        plt.rcParams["font.size"] = 22
+        plt.subplots_adjust(wspace=0.4)
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
+        plt.close()
+
+def plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
+        print("plotting exploitability graphs...")
+        #fig, axs = plt.subplots(1, len(market_types), figsize=(25.5, 5.5))
+        width_per_subplot = 8
+        fig, axs = plt.subplots(1, len(market_types), figsize=(width_per_subplot * len(market_types), 5.5))
+
+        if len(market_types) == 1:
+            axs = [axs]
+
+        for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
+            mean_obj = np.mean(obj_hist, axis=0) - sum(objective_value[market_type]) / len(objective_value[market_type])
+            axs[i].plot(mean_obj, color="b")
+            axs[i].set_title(title, fontsize="medium")
+            axs[i].set_xlabel('Iteration Number', fontsize=21)
+            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21)
+            #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
+            #axs[i].set_ylim(-0.05, 3)
+            pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
+
+        #fig.set_size_inches(25.5, 5.5)
+        plt.rcParams["font.size"] = 22
+        plt.subplots_adjust(wspace=0.4)
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
+        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
+        plt.close()
 
 def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
         print("plotting exploitability graphs...")
@@ -260,8 +320,8 @@ def main(args):
         'leontief': "Leontief Market"
     }
     plot_titles = [plot_titles_dict[market] for market in args.market_types]
-
-    plot_and_save_obj_graphs(obj_hist_data, plot_titles, args.market_types, dir_obj, dir_graphs, args.arch)
+    #plot_and_save_obj_graphs(obj_hist_data, plot_titles, args.market_types, dir_obj, dir_graphs, args.arch)
+    plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, args.market_types, dir_obj, dir_graphs, args.arch)
     plot_and_save_prices_graphs(prices_hist_data, plot_titles, args.market_types, dir_prices, dir_graphs, args.arch)
     plot_and_save_allocations_graphs(plot_titles, args.market_types, dir_allocations, dir_graphs, args.arch, args.num_buyers)
 
