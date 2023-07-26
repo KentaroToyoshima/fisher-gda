@@ -127,6 +127,12 @@ def plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, market_t
 
         for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
             mean_obj = np.mean(obj_hist, axis=0) - sum(objective_value[market_type]) / len(objective_value[market_type])
+            #Goktasによると、下の式はt^{-1/2}で割るということらしい
+            mean_obj = mean_obj.flatten()
+            indices = np.arange(1, len(mean_obj)+1, 1)
+            indices = indices ** (1/2)
+            mean_obj = mean_obj * indices
+            ### ここまで
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
             axs[i].set_xlabel('Iteration Number', fontsize=21)
