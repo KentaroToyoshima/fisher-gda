@@ -57,6 +57,11 @@ def run_experiment_time_average(fm_func, get_obj, market_type, num_buyers, valua
     objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(average_price_list, allocations_hist_gda)]
     return allocations_hist_gda, prices_hist_gda, objective_values
 
+def run_experiment(fm_func, get_obj, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
+    allocations_gda, prices_gda, allocations_hist_gda, prices_hist_gda = fm_func(num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch, market_type)
+    objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(prices_hist_gda, allocations_hist_gda)]
+    return allocations_hist_gda, prices_hist_gda, objective_values
+
 def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_types, dir_obj, dir_allocations, dir_prices):
     results = {key: [] for key in market_types}
     global objective_value
