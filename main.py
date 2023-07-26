@@ -287,6 +287,7 @@ def main(args):
     dir_graphs.mkdir(parents=True, exist_ok=True)
 
     write_params_to_file(args.market_types, args.num_experiments, args.num_buyers, args.num_goods, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_iters, args.update_freq, args.arch, dir_data)
+    #TODO:収束先を改めて指定する
     #収束先
     allocations_linear_ref = np.array([[0.20623613091668674,0.3336534555336145,0.25645391534516004,0.10005288662062428,0.0980636054576395,0.15957711474141045,0.2309186253627186,0.18359554918334048],
     [0.1931747247023043,0.2195250487167748,0.16046510898485222,0.24722257213277707,0.29780321154228784,0.19393492406887672,0.12729652286708698,0.2553246241947231],
