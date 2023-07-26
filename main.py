@@ -24,7 +24,7 @@ def get_obj_linear(prices, allocations, budgets, valuations):
         utils[buyer] = cu.get_linear_indirect_utill(prices.clip(min= 0.0001), b, v)
         #utils[buyer] = cu.get_linear_utility(allocations[buyer,:], v)
     # return np.sum(prices) + budgets.T @ np.log(utils) + np.sum(budgets) - np.sum(allocations @ prices )
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min = 0.01))
+    return np.sum(prices) + budgets.T @ np.log(utils.clip(min = 0.0001))
 
 def get_obj_cd(prices, allocations, budgets, valuations):
     utils = np.zeros(budgets.shape[0])
@@ -116,33 +116,6 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             df_obj = pd.DataFrame(obj_hist_all)
             df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_{key}_{experiment_num}.csv")
 
-def plot_and_save_obj_graphs_followed_paper_time_average(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
-        print("plotting exploitability graphs...")
-        #fig, axs = plt.subplots(1, len(market_types), figsize=(25.5, 5.5))
-        width_per_subplot = 8
-        fig, axs = plt.subplots(1, len(market_types), figsize=(width_per_subplot * len(market_types), 5.5))
-
-        if len(market_types) == 1:
-            axs = [axs]
-
-        for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
-            mean_obj = np.mean(obj_hist, axis=0) - sum(objective_value[market_type]) / len(objective_value[market_type])
-            axs[i].plot(mean_obj, color="b")
-            axs[i].set_title(title, fontsize="medium")
-            axs[i].set_xlabel('Iteration Number', fontsize=21)
-            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21)
-            #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
-            #axs[i].set_ylim(-0.05, 3)
-            pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
-
-        #fig.set_size_inches(25.5, 5.5)
-        plt.rcParams["font.size"] = 22
-        plt.subplots_adjust(wspace=0.4)
-        plt.grid(linestyle='dotted')
-        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
-        plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
-        plt.close()
-
 def plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, market_types, dir_obj, dir_graphs, arch):
         print("plotting exploitability graphs...")
         #fig, axs = plt.subplots(1, len(market_types), figsize=(25.5, 5.5))
@@ -158,6 +131,7 @@ def plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, market_t
             axs[i].set_title(title, fontsize="medium")
             axs[i].set_xlabel('Iteration Number', fontsize=21)
             axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21)
+            axs[i].grid(linestyle='dotted')
             #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
             #axs[i].set_ylim(-0.05, 3)
             pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
@@ -183,8 +157,9 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, 
             mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
-            axs[i].set_xlabel('Iteration Number', fontsize=21) # 22を任意のフォントサイズに変更
-            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21) # 22を任意のフォントサイズに変更
+            axs[i].set_xlabel('Iteration Number', fontsize=21)
+            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21)
+            axs[i].grid(linestyle='dotted')
             #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
             #axs[i].set_ylim(-0.05, 3)
             pd.DataFrame(mean_obj).to_csv(f"{dir_obj}/{arch}_exploit_hist_{market_type}.csv")
@@ -192,7 +167,6 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, 
         #fig.set_size_inches(25.5, 5.5)
         plt.rcParams["font.size"] = 22
         plt.subplots_adjust(wspace=0.4)
-        plt.grid(linestyle='dotted')
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.pdf")
         plt.savefig(f"{dir_graphs}/{arch}_exploit_graphs.jpg")
         plt.close()
@@ -212,12 +186,12 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir
         axs[i].set_title(title, fontsize="medium")
         axs[i].set(xlabel='Iteration Number', ylabel=r'prices')
         axs[i].legend(prices_hist[0].columns)
+        axs[i].grid(linestyle='dotted')
         pd.DataFrame(mean_prices).to_csv(f"{dir_prices}/{arch}_prices_hist_{market_type}_average.csv")
 
     #fig.set_size_inches(25.5, 5.5)
     plt.rcParams["font.size"] = 18
     plt.subplots_adjust(wspace=0.4)
-    plt.grid(linestyle='dotted')
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
