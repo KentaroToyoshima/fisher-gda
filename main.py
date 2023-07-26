@@ -52,7 +52,6 @@ def run_experiment_time_average(fm_func, get_obj, market_type, num_buyers, valua
     average_price_list = []
     for i in range(1, len(prices_hist_array) + 1):
         average_price = np.mean(prices_hist_array[:i], axis=0)
-        print(average_price)
         average_price_list.append(average_price)
     objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(average_price_list, allocations_hist_gda)]
     return allocations_hist_gda, prices_hist_gda, objective_values
