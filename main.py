@@ -45,9 +45,16 @@ def get_obj_leontief(prices, allocations, budgets, valuations):
     return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001))
 
 # Function that run Max-Oracle Gradient Descent and Nested Gradient Descent Ascent Tests and returns data
-def run_experiment(fm_func, get_obj, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
+def run_experiment_time_average(fm_func, get_obj, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
     allocations_gda, prices_gda, allocations_hist_gda, prices_hist_gda = fm_func(num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch, market_type)
-    objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(prices_hist_gda, allocations_hist_gda)]
+
+    prices_hist_array = np.array(prices_hist_gda)
+    average_price_list = []
+    for i in range(1, len(prices_hist_array) + 1):
+        average_price = np.mean(prices_hist_array[:i], axis=0)
+        print(average_price)
+        average_price_list.append(average_price)
+    objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(average_price_list, allocations_hist_gda)]
     return allocations_hist_gda, prices_hist_gda, objective_values
 
 def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_types, dir_obj, dir_allocations, dir_prices):
@@ -72,7 +79,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         if 'linear' in market_types:
             print(f"------ Linear Fisher Market ------")
             #TODO:market_typeはハードに指定しないとダメか？他の方法が無いか考える
-            results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
+            results["linear"].append(run_experiment_time_average(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
             objective_value["linear"].append(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
             #print(objective_value["linear"][-1])
             #print(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
@@ -81,7 +88,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         if 'cd' in market_types:
             print(f"------ Cobb-Douglas Fisher Market ------")
             #prices_0 = np.random.rand(num_goods)
-            results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
+            results["cd"].append(run_experiment_time_average(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
             objective_value["cd"].append(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').fun)
             #print(objective_value["cd"][-1])
             #print(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').x)
@@ -90,7 +97,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         if 'leontief' in market_types:
             print(f"------ Leontief Fisher Market ------")
             #prices_0 = np.random.rand(num_goods)
-            results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
+            results["leontief"].append(run_experiment_time_average(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
             objective_value["leontief"].append(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
             #print(objective_value["leontief"][-1])
             #print(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').x)
