@@ -72,7 +72,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         valuations = np.random.rand(num_buyers, num_goods) * 10 + 5
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
-        allocations_0 = np.random.rand(num_buyers, num_goods) + 0.1
+        allocations_0 = np.random.rand(num_buyers, num_goods) + 1
         prices_0 = np.random.rand(num_goods)
         bounds = [(0, None) for _ in prices_0]
 
@@ -82,7 +82,6 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         # Linear Fisher Market
         if 'linear' in market_types:
             print(f"------ Linear Fisher Market ------")
-            #TODO:market_typeはハードに指定しないとダメか？他の方法が無いか考える
             #TODO:time_averageと普通のやつを分けて指定できるようにする
             results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
             objective_value["linear"].append(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
@@ -174,10 +173,10 @@ def plot_and_save_obj_graphs(obj_hist_data, plot_titles, market_types, dir_obj, 
         for i, (obj_hist, title, market_type) in enumerate(zip(obj_hist_data, plot_titles, market_types)):
             mean_obj = np.mean(obj_hist, axis=0) - np.min(np.mean(obj_hist, axis=0))
             #Goktasによると、下の式はt^{-1/2}で割るということらしい
-            mean_obj = mean_obj.flatten()
-            indices = np.arange(1, len(mean_obj)+1, 1)
-            indices = indices ** (1/2)
-            mean_obj = mean_obj * indices
+            #mean_obj = mean_obj.flatten()
+            #indices = np.arange(1, len(mean_obj)+1, 1)
+            #indices = indices ** (1/2)
+            #mean_obj = mean_obj * indices
             ### ここまで
             axs[i].plot(mean_obj, color="b")
             axs[i].set_title(title, fontsize="medium")
@@ -219,9 +218,9 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
-
+'''
+#グラフを1枚にまとめずに，それぞれのグラフを別々に保存する
 def plot_and_save_allocations_graphs(plot_titles, market_types, dir_allocations, dir_graphs, arch, num_buyers):
-    #TODO:5枚のグラフを1枚にまとめる
     print("plotting allocations graphs...")
     fig, axs = plt.subplots()
 
@@ -251,6 +250,53 @@ def plot_and_save_allocations_graphs(plot_titles, market_types, dir_allocations,
             plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_buyer_{buyer}.pdf")
             plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_buyer_{buyer}.jpg")
             plt.close()
+'''
+
+def plot_and_save_allocations_graphs(plot_titles, market_types, dir_allocations, dir_graphs, arch, num_buyers):
+    print("plotting allocations graphs...")
+
+    n_cols = round(np.sqrt(num_buyers))  # Number of columns
+    n_rows = round(np.sqrt(num_buyers))  # Number of rows
+
+    if n_cols * n_rows < num_buyers:  # Adjust the number of rows if necessary
+        n_cols += 1
+
+    for market_type, plot_title in zip(market_types, plot_titles):
+        fig, axs = plt.subplots(n_rows, n_cols, figsize=(10*n_cols, 9*n_rows), squeeze=False)  # Adjust the number of subplots and the figure size
+
+        for buyer in range(num_buyers):
+            file_pattern = f"{dir_allocations}/{arch}_allocations_hist_{market_type}_*_buyer_{buyer}.csv"
+            file_list = glob.glob(file_pattern)
+            if not file_list:
+                print("No files found.")
+                return
+
+            dfs = [pd.read_csv(file, index_col=0) for file in file_list]
+            df_concat = pd.concat(dfs)
+            df_mean = df_concat.groupby(df_concat.index).mean()
+            pd.DataFrame(df_mean).to_csv(f"{dir_allocations}/{arch}_allocations_hist_{market_type}_buyer_{buyer}_average.csv")
+
+            # Calculate subplot row and column indices
+            row_idx = buyer // n_cols
+            col_idx = buyer % n_cols
+
+            df_mean.plot(ax=axs[row_idx, col_idx])  # Specify the axis to plot
+            axs[row_idx, col_idx].set_title(plot_title+' buyer '+str(buyer), fontsize="medium")
+            axs[row_idx, col_idx].set_xlabel('Iteration Number')
+            axs[row_idx, col_idx].set_ylabel('Allocations')
+            axs[row_idx, col_idx].grid(linestyle='dotted')
+
+        # Remove empty subplots
+        for idx in range(num_buyers, n_cols*n_rows):
+            fig.delaxes(axs.flatten()[idx])
+
+        plt.tight_layout()  # Adjust the layout
+        plt.rcParams["font.size"] = 18
+        plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_all_buyers.pdf")
+        plt.savefig(f"{dir_graphs}/{arch}_allocations_graphs_{market_type}_all_buyers.jpg")
+        plt.close()
+
+
 
 def get_dataframes(pattern, dir_content, dir_obj):
     files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
@@ -288,7 +334,7 @@ def main(args):
     dir_graphs.mkdir(parents=True, exist_ok=True)
 
     write_params_to_file(args.market_types, args.num_experiments, args.num_buyers, args.num_goods, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_iters, args.update_freq, args.arch, dir_data)
-    #TODO:収束先を改めて指定する
+    #TODO:収束先を実験のフォルダを指定するだけで定義できるようにする
     #収束先
     allocations_linear_ref = np.array([[0.2140533516657123,0.3061049563869186,0.27166908707005966,0.09571924111289291,0.0901534275339205,0.1871724245988343,0.2388888704801567,0.17565218791642462],
     [0.19524636955165617,0.22399845066806826,0.1605925706417905,0.24230411054588,0.3008993418189746,0.16602469940876047,0.1674345879496748,0.23229037423201512],
