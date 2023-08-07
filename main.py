@@ -31,36 +31,20 @@ parser.add_argument('-a', '--arch', type=str, default='alg4', choices=['alg2', '
 args = parser.parse_args()
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
-#TODO: 3つの関数を一つにまとめる
-def get_obj_linear(prices, allocations, budgets, valuations):
+def get_obj_value(prices, allocations, budgets, valuations, market_type):
     utils = np.zeros(budgets.shape[0])
     for buyer in range(budgets.shape[0]):
         b = budgets[buyer]
-        v = valuations[buyer,:]
-        utils[buyer] = cu.get_linear_indirect_utill(prices.clip(min= 0.0001), b, v)
-        #utils[buyer] = cu.get_linear_utility(allocations[buyer,:], v)
-    # return np.sum(prices) + budgets.T @ np.log(utils) + np.sum(budgets) - np.sum(allocations @ prices )
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min = 0.0001))
+        v = valuations[buyer, :]
+        if market_type == 'linear':
+            utils[buyer] = cu.get_linear_indirect_utill(prices.clip(min=0.0001), b, v)
+        elif market_type == 'cd':
+            utils[buyer] = cu.get_CD_indirect_util(prices.clip(min=0.0001), b, v)
+        elif market_type == 'leontief':
+            utils[buyer] = cu.get_leontief_indirect_util(prices.clip(min=0.0001), b, v)
+    return np.sum(prices) + budgets.T @ np.log(utils.clip(min=0.0001))
 
-def get_obj_cd(prices, allocations, budgets, valuations):
-    utils = np.zeros(budgets.shape[0])
-    for buyer in range(budgets.shape[0]):
-        b = budgets[buyer]
-        v = valuations[buyer,:]
-        utils[buyer] = cu.get_CD_indirect_util(prices.clip(min= 0.0001), b, v)
-        #utils[buyer] = cu.get_CD_utility(allocations[buyer,:], v)
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001)) 
-
-def get_obj_leontief(prices, allocations, budgets, valuations):
-    utils = np.zeros(budgets.shape[0])
-    for buyer in range(budgets.shape[0]):
-        b = budgets[buyer]
-        v = valuations[buyer,:]
-        utils[buyer] = cu.get_leontief_indirect_util(prices.clip(min= 0.0001), b, v)
-        #utils[buyer] = cu.get_leontief_utility(allocations[buyer,:], v)
-    return np.sum(prices) + budgets.T @ np.log(utils.clip(min= 0.0001))
-
-def run_experiment_time_average(fm_func, get_obj, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
+def run_experiment_time_average(fm_func, get_obj_value, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
     allocations_gda, prices_gda, allocations_hist_gda, prices_hist_gda = fm_func(num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch, market_type)
 
     prices_hist_array = np.array(prices_hist_gda)
@@ -68,12 +52,12 @@ def run_experiment_time_average(fm_func, get_obj, market_type, num_buyers, valua
     for i in range(1, len(prices_hist_array) + 1):
         average_price = np.mean(prices_hist_array[:i], axis=0)
         average_price_list.append(average_price)
-    objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(average_price_list, allocations_hist_gda)]
+    objective_values = [get_obj_value(p, x, budgets, valuations, market_type) for p, x in zip(average_price_list, allocations_hist_gda)]
     return allocations_hist_gda, prices_hist_gda, objective_values
 
-def run_experiment(fm_func, get_obj, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
+def run_experiment(fm_func, get_obj_value, market_type, num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch):
     allocations_gda, prices_gda, allocations_hist_gda, prices_hist_gda = fm_func(num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate, mutation_rate, allocations_ref, prices_ref, num_iters, update_freq, arch, market_type)
-    objective_values = [get_obj(p, x, budgets, valuations) for p, x in zip(prices_hist_gda, allocations_hist_gda)]
+    objective_values = [get_obj_value(p, x, budgets, valuations ,market_type) for p, x in zip(prices_hist_gda, allocations_hist_gda)]
     return allocations_hist_gda, prices_hist_gda, objective_values
 
 def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_experiments, num_iters, update_freq, arch, market_types, dir_obj, dir_allocations, dir_prices):
@@ -98,20 +82,20 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         if 'linear' in market_types:
             print(f"------ Linear Fisher Market ------")
             #TODO:time_averageと普通のやつを分けて指定できるようにする
-            results["linear"].append(run_experiment(fm.calc_gda, get_obj_linear, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
-            objective_value["linear"].append(minimize(get_obj_linear, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
+            results["linear"].append(run_experiment(fm.calc_gda, get_obj_value, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
+            objective_value["linear"].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations, 'linear'), method='SLSQP').fun)
 
         # Cobb-Douglas Fisher Market
         if 'cd' in market_types:
             print(f"------ Cobb-Douglas Fisher Market ------")
-            results["cd"].append(run_experiment(fm.calc_gda, get_obj_cd, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
-            objective_value["cd"].append(minimize(get_obj_cd, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd), method='SLSQP').fun)
+            results["cd"].append(run_experiment(fm.calc_gda, get_obj_value, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
+            objective_value["cd"].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd, 'cd'), method='SLSQP').fun)
 
         # Leontief Fisher Market
         if 'leontief' in market_types:
             print(f"------ Leontief Fisher Market ------")
-            results["leontief"].append(run_experiment(fm.calc_gda, get_obj_leontief, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
-            objective_value["leontief"].append(minimize(get_obj_leontief, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations), method='SLSQP').fun)
+            results["leontief"].append(run_experiment(fm.calc_gda, get_obj_value, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
+            objective_value["leontief"].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations, 'leontief'), method='SLSQP').fun)
 
         # Save data
         for key in results:
