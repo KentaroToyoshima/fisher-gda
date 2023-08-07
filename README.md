@@ -35,7 +35,7 @@ The command line arguments are as follows:
 Here is an example of how to run the framework:
 
 ```
-python main.py -mt linear cd leontief -e 10 -b 5 -g 8 -li 0.01 0.01 -cd 0.01 0.01 -Le 0.01 0.01 -mu 0.1 2 5 -i 1000 -u 0 -a alg4
+python main.py -mt linear cd leontief -e 10 -b 5 -g 8 -li 0.01 0.01 -cd 0.01 0.01 -Le 0.001 0.001 -mu 0.1 0.1 1 -i 1000 -u 0 -a alg4
 ```
 
 This command runs 10 experiments for all market types 'linear', 'cd', 'leontief'. Each market consists of 5 buyers and 8 goods. Also, the learning rate for linear, CD, and Leontief markets are all [0.01, 0.01], with mutation rates of 0.1, 2, and 5 respectively. Each experiment runs 1000 iterations and uses the 'alg4' algorithm.
