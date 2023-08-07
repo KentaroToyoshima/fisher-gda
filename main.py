@@ -15,6 +15,7 @@ import argparse
 import time
 from scipy.optimize import minimize
 from plot import *
+from utils import *
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
@@ -74,28 +75,20 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         allocations_0 = np.random.rand(num_buyers, num_goods) + 1
         prices_0 = np.random.rand(num_goods)
         bounds = [(0, None) for _ in prices_0]
-
+        market_settings = {
+            "linear": (valuations, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref),
+            "cd": (valuations_cd, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref),
+            "leontief": (valuations, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref)
+        }
         print(f"************* Experiment: {experiment_num + 1}/{num_experiments} *************")
         print(f"val = {valuations}\n budgets = {budgets}\n")
-
-        # Linear Fisher Market
-        if 'linear' in market_types:
-            print(f"------ Linear Fisher Market ------")
-            #TODO:time_averageと普通のやつを分けて指定できるようにする
-            results["linear"].append(run_experiment(fm.calc_gda, get_obj_value, 'linear', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref, num_iters, update_freq, arch))
-            objective_value["linear"].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations, 'linear'), method='SLSQP').fun)
-
-        # Cobb-Douglas Fisher Market
-        if 'cd' in market_types:
-            print(f"------ Cobb-Douglas Fisher Market ------")
-            results["cd"].append(run_experiment(fm.calc_gda, get_obj_value, 'cd', num_buyers, valuations_cd, budgets, allocations_0, prices_0, learning_rate_cd, mutation_rate[1], allocations_cd_ref, prices_cd_ref, num_iters, update_freq, arch))
-            objective_value["cd"].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations_cd, 'cd'), method='SLSQP').fun)
-
-        # Leontief Fisher Market
-        if 'leontief' in market_types:
-            print(f"------ Leontief Fisher Market ------")
-            results["leontief"].append(run_experiment(fm.calc_gda, get_obj_value, 'leontief', num_buyers, valuations, budgets, allocations_0, prices_0, learning_rate_leontief, mutation_rate[2], allocations_leontief_ref, prices_leontief_ref, num_iters, update_freq, arch))
-            objective_value["leontief"].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, valuations, 'leontief'), method='SLSQP').fun)
+        for market_type in market_types:
+        #TODO:time_averageと普通のやつを分けて指定できるようにする
+            print(f"------ {market_type} Fisher Market ------")
+            val, learning_rate, mutation, allocations_ref, prices_ref = market_settings[market_type]
+            
+            results[market_type].append(run_experiment_time_average(fm.calc_gda, get_obj_value, market_type, num_buyers, val, budgets, allocations_0, prices_0, learning_rate, mutation, allocations_ref, prices_ref, num_iters, update_freq, arch))
+            objective_value[market_type].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, val, market_type), method='SLSQP').fun)
 
         # Save data
         for key in results:
@@ -117,28 +110,6 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             # Save objective function
             df_obj = pd.DataFrame(obj_hist_all)
             df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_{key}_{experiment_num}.csv")
-
-def get_dataframes(pattern, dir_content, dir_obj):
-    files = [os.path.join(dir_obj, file) for file in dir_content if re.match(pattern, file)]
-    return [pd.read_csv(file, index_col=0) for file in files]
-
-def write_params_to_file(market_types, num_experiments, num_buyers, num_goods, learning_rate_linear, learning_rate_cd, learning_rate_leontief, mutation_rate, num_iters, update_freq, arch, dir_data):
-    params = {
-        "market_types": market_types,
-        "num_experiments": num_experiments,
-        "num_buyers": num_buyers,
-        "num_goods": num_goods,
-        "learning_rate_linear": learning_rate_linear,
-        "learning_rate_cd": learning_rate_cd,
-        "learning_rate_leontief": learning_rate_leontief,
-        "mutation_rate": mutation_rate,
-        "num_iters": num_iters,
-        "update_freq": update_freq,
-        "arch": arch,
-    }
-
-    with open(f'{dir_data}/args.json', 'w') as f:
-        json.dump(params, f, indent=4)
 
 def main(args):
     now = datetime.datetime.now()
