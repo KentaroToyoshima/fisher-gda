@@ -112,17 +112,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             df_obj.to_csv(f"{dir_obj}/{arch}_obj_hist_{key}_{experiment_num}.csv")
 
 def main(args):
-    now = datetime.datetime.now()
-    nowdate = now.strftime("%Y_%m_%d_%H_%M_%S_%f")
-    dir_data = Path(f'results/{nowdate}_{args.arch}_en_{args.num_experiments}_iters_{args.num_iters}_uf_{args.update_freq}')
-    dir_obj = Path(f"{dir_data}/data/obj")
-    dir_obj.mkdir(parents=True, exist_ok=True)
-    dir_allocations = Path(f"{dir_data}/data/allocations")
-    dir_allocations.mkdir(parents=True, exist_ok=True)
-    dir_prices = Path(f"{dir_data}/data/prices")
-    dir_prices.mkdir(parents=True, exist_ok=True)
-    dir_graphs = Path(f"{dir_data}/graphs")
-    dir_graphs.mkdir(parents=True, exist_ok=True)
+    dir_data, dir_obj, dir_allocations, dir_prices, dir_graphs = create_directories(args.arch, args.num_experiments, args.num_iters, args.update_freq)
 
     write_params_to_file(args.market_types, args.num_experiments, args.num_buyers, args.num_goods, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_iters, args.update_freq, args.arch, dir_data)
     #TODO:収束先を実験のフォルダを指定するだけで定義できるようにする
@@ -153,6 +143,7 @@ def main(args):
     # results
     run_test(args.num_buyers, args.num_goods, allocations_linear_ref, allocations_cd_ref, allocations_leontief_ref, prices_linear_ref, prices_cd_ref, prices_leontief_ref, args.learning_rate_linear, args.learning_rate_cd, args.learning_rate_leontief, args.mutation_rate, args.num_experiments, args.num_iters, args.update_freq, args.arch, args.market_types, dir_obj, dir_allocations, dir_prices)
 
+    #TODO:以下をもっと綺麗に書く（objとpriceはdataはここでデータを取ってきているのに、allocationsはplot関数で取ってきている）
     patterns = [rf'.*{key}.*\.csv' for key in args.market_types]
     dir_content = os.listdir(dir_obj)
     obj_hist_data = [get_dataframes(pattern, dir_content, dir_obj) for pattern in patterns]
