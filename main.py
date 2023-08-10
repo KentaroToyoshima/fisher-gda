@@ -87,6 +87,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
             print(f"------ {market_type} Fisher Market ------")
             val, learning_rate, mutation, allocations_ref, prices_ref = market_settings[market_type]
             
+            #results[market_type].append(run_experiment_time(fm.calc_gda, get_obj_value, market_type, num_buyers, val, budgets, allocations_0, prices_0, learning_rate, mutation, allocations_ref, prices_ref, num_iters, update_freq, arch))
             results[market_type].append(run_experiment_time_average(fm.calc_gda, get_obj_value, market_type, num_buyers, val, budgets, allocations_0, prices_0, learning_rate, mutation, allocations_ref, prices_ref, num_iters, update_freq, arch))
             objective_value[market_type].append(minimize(get_obj_value, prices_0, bounds=bounds, args=(allocations_0, budgets, val, market_type), method='SLSQP').fun)
 
