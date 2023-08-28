@@ -92,7 +92,7 @@ def plot_and_save_prices_graphs(prices_hist_data, plot_titles, market_types, dir
 
     #fig.set_size_inches(25.5, 5.5)
     plt.rcParams["font.size"] = 18
-    plt.subplots_adjust(wspace=0.4)
+    plt.subplots_adjust(wspace=0.4, bottom=0.15)
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.jpg")
     plt.savefig(f"{dir_graphs}/{arch}_prices_graphs.pdf")
     plt.close()
