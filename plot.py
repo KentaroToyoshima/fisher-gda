@@ -23,9 +23,10 @@ def plot_and_save_obj_graphs_followed_paper(obj_hist_data, plot_titles, market_t
             #mean_obj = mean_obj * indices
             ### ここまで
             axs[i].plot(mean_obj, color="b")
+            axs[i].set_ylim(-0.05, 50)
             axs[i].set_title(title, fontsize="medium")
             axs[i].set_xlabel('Iteration Number', fontsize=21)
-            axs[i].set_ylabel(r'Explotability$/t^{-1/2}$', fontsize=21)
+            axs[i].set_ylabel(r'Explotability', fontsize=21)
             axs[i].grid(linestyle='dotted')
             #axs[i].set(xlabel='Iteration Number', ylabel=r'Explotability$/t^{-1/2}$', fontsize=22)
             #axs[i].set_ylim(-0.05, 3)

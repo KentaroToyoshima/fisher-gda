@@ -36,8 +36,8 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
         excess_allocation = allocation - 1
 
         step_size = excess_allocation
-        if decay_outer:
-            step_size *= iter ** (-1 / 2)
+        # if decay_outer:
+        #     step_size *= iter ** (-1 / 2)
         if arch == 'm-alg2':
             step_size += mutation_rate * (prices_ref - prices)
         prices += learning_rate[0] * step_size * (prices > 0)
@@ -68,34 +68,18 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
                 allocations_grad = (budgets*(valuations/allocations.clip(min=0.001)).T).T - np.array([prices, ]*budgets.shape[0]) + mutation_rate * (allocations_ref - allocations)
         elif market_type == 'leontief':
             if arch == 'alg2':
-                #allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
-                    #allocations_grad[buyer, :] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
                     allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 1e-5) - prices[min_util_good]
-                    #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
-                    #allocations_grad[buyer, :] = budgets[buyer]/allocations[buyer, min_util_good] - prices[min_util_good]
-                    #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
             elif arch == 'alg4':
-                #allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
-                    #allocations_grad[buyer, :] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001)
                     allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 1e-5)
-                    #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
-                    #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
             elif arch == 'm-alg2':
-                #allocations_grad = np.zeros_like(allocations)
                 for buyer in range(budgets.shape[0]):
                     min_util_good = np.argmin(allocations[buyer, :] / valuations[buyer, :])
-                    #allocations_grad[buyer, :] = budgets[buyer]/max(allocations[buyer, min_util_good], 0.001) - prices[min_util_good]
                     allocations_grad[buyer, min_util_good] = budgets[buyer]/max(allocations[buyer, min_util_good], 1e-5) - prices[min_util_good]
-                    #allocations_grad[buyer, :] = 1 / valuations[buyer, min_util_good]
-                    #allocations_grad[:, min_util_good] = 1 / valuations[buyer, min_util_good]
-                    #allocations_grad[buyer, min_util_good] = 1 / valuations[buyer, min_util_good]
-                allocations_grad += mutation_rate * (allocations_ref - allocations)
+                    allocations_grad[buyer, :] += mutation_rate * (allocations_ref[buyer, :] - allocations[buyer, :])
         else: exit("unknown market type")
 
         # if decay_inner:
