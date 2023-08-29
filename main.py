@@ -18,17 +18,28 @@ from plot import *
 from utils import *
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
+#parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['linear', 'cd', 'leontief'])
+#parser.add_argument('-e', '--num_experiments', type=int, default=5)
+#parser.add_argument('-b', '--num_buyers', type=int, default=5)
+#parser.add_argument('-g', '--num_goods', type=int, default=8)
+#parser.add_argument('-li', '--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
+#parser.add_argument('-cd', '--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
+#parser.add_argument('-Le', '--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
+#parser.add_argument('-mu', '--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
+#parser.add_argument('-i', '--num_iters', type=int, default=1000)
+#parser.add_argument('-u', '--update_freq', type=int, default=0)
+#parser.add_argument('-a', '--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
+parser.add_argument('-mt', '--market_types', nargs='+', choices=['linear', 'cd', 'leontief'], default=['leontief'])
 parser.add_argument('-e', '--num_experiments', type=int, default=5)
 parser.add_argument('-b', '--num_buyers', type=int, default=5)
 parser.add_argument('-g', '--num_goods', type=int, default=8)
 parser.add_argument('-li', '--learning_rate_linear', nargs='+', type=float, default=[0.01, 0.01])
 parser.add_argument('-cd', '--learning_rate_cd', nargs='+', type=float, default=[0.01, 0.01])
 parser.add_argument('-Le', '--learning_rate_leontief', nargs='+', type=float, default=[0.01, 0.01])
-parser.add_argument('-mu', '--mutation_rate', nargs='+', type=float, default=[1, 1, 1])
-parser.add_argument('-i', '--num_iters', type=int, default=1000)
-parser.add_argument('-u', '--update_freq', type=int, default=0)
-parser.add_argument('-a', '--arch', type=str, default='alg4', choices=['alg2', 'm-alg2', 'alg4'])
+parser.add_argument('-mu', '--mutation_rate', nargs='+', type=float, default=[1, 1, 5])
+parser.add_argument('-i', '--num_iters', type=int, default=5000)
+parser.add_argument('-u', '--update_freq', type=int, default=500)
+parser.add_argument('-a', '--arch', type=str, default='m-alg2', choices=['alg2', 'm-alg2', 'alg4'])
 args = parser.parse_args()
 
 # Objective Functions for linear, Cobb-Douglas, and Leontief
@@ -72,7 +83,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         valuations = np.random.rand(num_buyers, num_goods) * 10 + 5
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
-        allocations_0 = np.random.rand(num_buyers, num_goods) + 1
+        allocations_0 = np.random.rand(num_buyers, num_goods)
         prices_0 = np.random.rand(num_goods)
         bounds = [(0, None) for _ in prices_0]
         market_settings = {

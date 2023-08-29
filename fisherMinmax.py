@@ -35,7 +35,7 @@ def calc_gda(num_buyers, valuations, budgets, allocations_0, prices_0, learning_
         allocation = np.sum(allocations, axis=0)
         excess_allocation = allocation - 1
 
-        step_size = excess_allocation
+        step_size = np.copy(excess_allocation)
         # if decay_outer:
         #     step_size *= iter ** (-1 / 2)
         if arch == 'm-alg2':
