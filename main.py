@@ -80,7 +80,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
     for experiment_num in range(num_experiments):
         np.random.seed(experiment_num)
         random.seed(experiment_num)
-        valuations = np.random.rand(num_buyers, num_goods) * 10 + 5
+        valuations = np.random.rand(num_buyers, num_goods) * 10 + 10
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
         allocations_0 = np.random.rand(num_buyers, num_goods)
