@@ -189,7 +189,7 @@ def run_test(num_buyers, num_goods, learning_rate_linear, learning_rate_cd, lear
 
 if __name__ == '__main__':
 
-    num_experiments = 50
+    num_experiments = 10
     num_buyers =  5
     num_goods = 8
     learning_rate_linear =  ((3,0.1), (1000**(-1/2),1000**(-1/2)))
@@ -303,21 +303,21 @@ if __name__ == '__main__':
     # second row for experiments with high initial prices.
     
     # Add shift in plots to make the difference clearer
-    axs[0].plot([iter for iter in range(num_iters_linear)], (obj_gda_linear_low)/(x_linear**(-1/2)), alpha = 1, color = "b")
+    axs[0].plot([iter for iter in range(num_iters_linear)], (obj_gda_linear_low), alpha = 1, color = "b")
     # print((obj_gda_linear_low) - (x_linear**(-1/2)))
     # axs[0].plot([iter for iter in range(num_iters_linear)], obj_gda_linear_low, alpha = 1, color = "g")
     # axs[0].plot((obj_gda_linear_low[0] - obj_gda_linear_low[-1],)/(x_linear**(1/2)) + obj_gda_linear_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt{T}$")
     axs[0].set_title("Linear Market", fontsize = "medium")
     # axs[0,0].set_ylim(2100, 2500)
 
-    axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low/(x_cd**(-1/2)) , color = "b")
+    axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low, color = "b")
     # axs[1].plot([iter for iter in range(num_iters_cd)], obj_gda_cd_low, color = "g")
     # axs[0,1].plot(x, (obj_gda_cd[0]/3)/x + obj_gda_cd[-1], color='green', linestyle='dashed', label = "1/T")
     # axs[1].plot(x_cd, (obj_gda_cd_low[0] - obj_gda_cd_low[-1])/(x_cd**(1/2)) + obj_gda_cd_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
     axs[1].set_title("Cobb-Douglas Market", fontsize = "medium")
     # axs[0,1].set_ylim(-330, 200)
 
-    axs[2].plot([iter for iter in range(num_iters_leontief)], obj_gda_leontief_low/(x_leontief**(-1/2)), color = "b")
+    axs[2].plot([iter for iter in range(num_iters_leontief)], obj_gda_leontief_low, color = "b")
     # axs[2].plot(x_leontief, (obj_gda_leontief_low[0] - obj_gda_leontief_low[-1])/(x_leontief**(1/3)) + obj_gda_leontief_low[-1], color='green', linestyle='dashed', label = r"$1/T^{\frac{1}{3}}$")
     # axs[2].plot(x_leontief, (obj_gda_leontief_low[0] - obj_gda_leontief_low[-1])/(x_leontief**(1/2)) + obj_gda_leontief_low[-1], color='red', linestyle='dashed', label = r"$1/\sqrt(T)$")
     axs[2].set_title("Leontief Market", fontsize = "medium")

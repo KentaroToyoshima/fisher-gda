@@ -185,8 +185,7 @@ def gda_leontief(valuations, budgets, prices_0, learning_rate, num_iters, decay_
             if(decay_inner):
                 demands[buyer,min_util_good] += learning_rate[1]*iter**(-1/2)*(1/(valuations[buyer, min_util_good]))
             else:  
-                #demands[buyer,min_util_good] += learning_rate[1]**(1/(valuations[buyer, min_util_good]))
-                demands[buyer,min_util_good] += learning_rate[1]*(1/(valuations[buyer, min_util_good]))
+                demands[buyer,min_util_good] += learning_rate[1]**(1/(valuations[buyer, min_util_good]))
 
         # Projection step
         demands = project_to_bugdet_set(demands, prices, budgets)
