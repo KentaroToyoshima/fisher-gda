@@ -84,7 +84,7 @@ def run_test(num_buyers, num_goods, allocations_linear_ref, allocations_cd_ref, 
         valuations_cd = (valuations.T / np.sum(valuations, axis=1)).T
         budgets = np.random.rand(num_buyers) * 10 + 10
         allocations_0 = np.random.rand(num_buyers, num_goods)
-        prices_0 = np.random.rand(num_goods)
+        prices_0 = np.random.rand(num_goods) * 5 + 5
         bounds = [(0, None) for _ in prices_0]
         market_settings = {
             "linear": (valuations, learning_rate_linear, mutation_rate[0], allocations_linear_ref, prices_linear_ref),
