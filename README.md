@@ -2,6 +2,30 @@
 
 Min-Max GDA-Fisher is a framework for evaluating the performance of algorithms across different market types.
 
+## Directory Structure
+
+The directory structure for the project is as follows:
+
+- `main.py`: This file contains the main Python script that runs the framework.
+
+- `utils.py`: This file contains utility functions and helper scripts used by the framework.
+
+- `scripts.sh`: This file contains shell scripts used for various tasks in the framework.
+
+- `requirements.txt`: This file lists the Python libraries required by the framework.
+
+- `README.md`: This file contains the documentation and instructions for using the Min-Max GDA-Fisher framework.
+
+- `fisherMinmax.py`: This file contains implementations of various LGDA algorithms.
+
+- `fisher_env.yml`: This file is an environment configuration file for setting up the required dependencies.
+
+- `consumerUtility.py`: This file contains the implementation of the consumer utility functions.
+
+- `assemble_plot.py`: This file contains the code for assembling and plotting the results of the experiments.
+
+- `results/`: This directory is used to store the results of the experiments.
+
 ## Requirements
 
 ### Programming Languages
